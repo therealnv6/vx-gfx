@@ -18,15 +18,11 @@ namespace gfx
         GLFWwindow *window;
 
         context(uint32_t width, uint32_t height, const char *name);
+        context(const context &) = delete;
+
         ~context();
 
-        context(const context &) = delete;
         context &operator=(const context &) = delete;
-
-        context *operator->()
-        {
-            return this;
-        }
 
         static context& current()
         {
@@ -46,5 +42,4 @@ namespace gfx
         void init_window();
         void init_vulkan();
     };
-
 }

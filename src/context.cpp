@@ -3,7 +3,6 @@
 namespace gfx
 {
     context* context::current_context = nullptr;
-
     context::context(uint32_t width, uint32_t height, const char *name) : width{width}, height{height}, window_name{name}
     {
         gfx::context::current_context = this;
