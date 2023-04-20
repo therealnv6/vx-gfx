@@ -6,12 +6,12 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#include <vulkan/vulkan.hpp> // modern c++!
+#include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
 namespace gfx
 {
-    static std::shared_ptr<context> current_context = nullptr;
-
     class context
     {
     public:
@@ -28,17 +28,23 @@ namespace gfx
             return this;
         }
 
-        static std::shared_ptr<context> current()
+        static context& current()
         {
-            return current_context;
+            return *context::current_context;
         }
 
     private:
         const uint32_t width;
         const uint32_t height;
 
-        std::string windowName;
+        std::string window_name;
+
+        // vulkan objects
+        VkInstance instance;
+        static context *current_context;
 
         void init_window();
+        void init_vulkan();
     };
+
 }
