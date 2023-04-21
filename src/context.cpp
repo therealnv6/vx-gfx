@@ -29,18 +29,36 @@ namespace gfx
 
     void context::init_vulkan()
     {
-        vk::ApplicationInfo appInfo(this->window_name.c_str(), VK_MAKE_VERSION(1, 0, 0), "No Engine",
+        vk::ApplicationInfo app_info(this->window_name.c_str(),
+            VK_MAKE_VERSION(1, 0, 0), "No Engine",
             VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
 
         std::vector<const char *> validationLayers;
 
-        vk::InstanceCreateInfo createInfo({}, &appInfo, (uint32_t) validationLayers.size());
-        vk::UniqueInstance instance = vk::createInstanceUnique(createInfo);
+        vk::InstanceCreateInfo create_info({}, &app_info, (uint32_t) validationLayers.size());
+        vk::UniqueInstance instance = vk::createInstanceUnique(create_info);
 
         std::vector<vk::PhysicalDevice> devices = instance->enumeratePhysicalDevices();
 
-        vk::PhysicalDevice physicalDevice = devices[0];
+        bool found_device = false;
+        vk::PhysicalDevice physical_device = nullptr;
+
+        for (const auto &device : devices)
+        {
+            if (this->device_suitable(device))
+            {
+                physical_device = device;
+                found_device = true;
+                break;
+            }
+        }
+
+        if (!found_device)
+        {
+            throw std::runtime_error("failed to find a suitable device.");
+        }
+
         vk::DeviceCreateInfo deviceCreateInfo({}, 0, nullptr, 0, nullptr);
-        vk::UniqueDevice device = physicalDevice.createDeviceUnique(deviceCreateInfo);
+        vk::UniqueDevice device = physical_device.createDeviceUnique(deviceCreateInfo);
     }
 }

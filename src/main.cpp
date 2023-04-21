@@ -10,6 +10,17 @@ int main()
     try
     {
         gfx::context context(800, 600, "vx-gfx");
+        context.device_suitable = [](vk::PhysicalDevice device)
+        {
+            vk::PhysicalDeviceProperties properties;
+            device.getProperties<vk::DispatchLoaderStatic>(&properties);
+
+            vk::PhysicalDeviceFeatures features;
+            device.getFeatures<vk::DispatchLoaderStatic>(&features);
+
+            return properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu && features.geometryShader;
+        };
+
         gfx::framework framework(context.window);
         gfx::pipeline pipeline { "shaders/triangle.vert.spv",
             "shaders/triangle.frag.spv" };

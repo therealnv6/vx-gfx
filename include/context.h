@@ -3,14 +3,13 @@
 #define GLFW_INCLUDE_VULKAN
 
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <stdexcept>
-
 
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan.hpp> // modern c++!
-
 
 namespace gfx
 {
@@ -18,6 +17,8 @@ namespace gfx
     {
     public:
         GLFWwindow *window;
+        std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
+        { return true; };
 
         context(uint32_t width, uint32_t height, const char *name);
         context(const context &) = delete;
