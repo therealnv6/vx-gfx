@@ -11,7 +11,8 @@ int main()
     {
         gfx::context context(800, 600, "vx-gfx");
         gfx::framework framework(context.window);
-        gfx::pipeline pipeline{"shaders/triangle.vert.spv", "shaders/triangle.frag.spv"};
+        gfx::pipeline pipeline { "shaders/triangle.vert.spv",
+            "shaders/triangle.frag.spv" };
 
         framework.run();
     }

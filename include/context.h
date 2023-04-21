@@ -2,13 +2,15 @@
 
 #define GLFW_INCLUDE_VULKAN
 
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 #include <stdexcept>
 
-#include <vulkan/vulkan.hpp> // modern c++!
-#include <vulkan/vulkan.h>
+
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp> // modern c++!
+
 
 namespace gfx
 {
@@ -24,7 +26,7 @@ namespace gfx
 
         context &operator=(const context &) = delete;
 
-        static context& current()
+        static context &current()
         {
             return *context::current_context;
         }

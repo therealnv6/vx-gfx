@@ -2,8 +2,11 @@
 
 namespace gfx
 {
-    context* context::current_context = nullptr;
-    context::context(uint32_t width, uint32_t height, const char *name) : width{width}, height{height}, window_name{name}
+    context *context::current_context = nullptr;
+    context::context(uint32_t width, uint32_t height, const char *name)
+        : width { width }
+        , height { height }
+        , window_name { name }
     {
         gfx::context::current_context = this;
         this->init_window();
@@ -27,7 +30,7 @@ namespace gfx
     void context::init_vulkan()
     {
         vk::ApplicationInfo appInfo(this->window_name.c_str(), VK_MAKE_VERSION(1, 0, 0), "No Engine",
-                                    VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
+            VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
 
         std::vector<const char *> validationLayers;
 

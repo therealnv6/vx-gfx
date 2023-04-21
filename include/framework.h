@@ -6,7 +6,10 @@ namespace gfx
     class framework
     {
     public:
-        framework(GLFWwindow *window) : window{window} {}
+        framework(GLFWwindow *window)
+            : window { window }
+        {
+        }
 
         bool should_window_close();
         void run();

@@ -1,6 +1,7 @@
-#include <pipeline.h>
 #include <fstream>
 #include <iostream>
+#include <pipeline.h>
+
 
 namespace gfx
 {
@@ -11,7 +12,7 @@ namespace gfx
 
     std::vector<char> read_file(const std::string &file_path)
     {
-        std::ifstream file{file_path, std::ios::ate | std::ios::binary};
+        std::ifstream file { file_path, std::ios::ate | std::ios::binary };
 
         if (!file.is_open())
         {
