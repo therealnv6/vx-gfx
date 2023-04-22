@@ -39,26 +39,23 @@ namespace gfx
         vk::UniqueInstance instance = vk::createInstanceUnique(create_info);
 
         std::vector<vk::PhysicalDevice> devices = instance->enumeratePhysicalDevices();
-
-        bool found_device = false;
-        vk::PhysicalDevice physical_device = nullptr;
+        std::optional<vk::PhysicalDevice> physical_device = nullptr;
 
         for (const auto &device : devices)
         {
             if (this->device_suitable(device))
             {
                 physical_device = device;
-                found_device = true;
                 break;
             }
         }
 
-        if (!found_device)
+        if (!physical_device.has_value())
         {
             throw std::runtime_error("failed to find a suitable device.");
         }
 
         vk::DeviceCreateInfo deviceCreateInfo({}, 0, nullptr, 0, nullptr);
-        vk::UniqueDevice device = physical_device.createDeviceUnique(deviceCreateInfo);
+        vk::UniqueDevice device = physical_device->createDeviceUnique(deviceCreateInfo);
     }
 }

@@ -11,6 +11,8 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan.hpp> // modern c++!
 
+#include <optional>
+
 namespace gfx
 {
     class context
