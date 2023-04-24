@@ -58,4 +58,32 @@ namespace gfx
         vk::DeviceCreateInfo deviceCreateInfo({}, 0, nullptr, 0, nullptr);
         vk::UniqueDevice device = physical_device->createDeviceUnique(deviceCreateInfo);
     }
+
+    gfx::queue_family_indices find_queue_families(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
+    {
+        std::vector<vk::QueueFamilyProperties> queue_family_properties = device->getQueueFamilyProperties();
+
+        gfx::queue_family_indices indices;
+        uint32_t i = 0;
+
+        for (const auto &queue_family : queue_family_properties)
+        {
+            if (indices.graphics_family.has_value())
+            {
+                break;
+            }
+
+            if (queue_family.queueFlags & flag_bits)
+            {
+                indices.graphics_family = i;
+            }
+        }
+
+        return indices;
+    }
+
+    bool is_device_suitable(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
+    {
+        return gfx::find_queue_families(device, flag_bits).graphics_family.has_value();
+    }
 }

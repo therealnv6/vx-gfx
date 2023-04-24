@@ -15,9 +15,16 @@
 
 namespace gfx
 {
+    struct queue_family_indices
+    {
+        std::optional<uint32_t> graphics_family;
+    };
+
     class context
     {
     public:
+        vk::QueueFlagBits flag_bits = vk::QueueFlagBits::eGraphics;
+
         GLFWwindow *window;
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
         { return true; };
