@@ -27,6 +27,34 @@ namespace gfx
         this->window = glfwCreateWindow(width, height, this->window_name.c_str(), nullptr, nullptr);
     }
 
+    gfx::queue_family_indices find_queue_families(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
+    {
+        std::vector<vk::QueueFamilyProperties> queue_family_properties = device->getQueueFamilyProperties();
+        gfx::queue_family_indices indices;
+
+        uint32_t i = 0;
+
+        for (const auto &queue_family : queue_family_properties)
+        {
+            if (indices.graphics_family.has_value())
+            {
+                break;
+            }
+
+            if (queue_family.queueFlags & flag_bits)
+            {
+                indices.graphics_family = i;
+            }
+        }
+
+        return indices;
+    }
+
+    bool is_device_suitable(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
+    {
+        return gfx::find_queue_families(device, flag_bits).graphics_family.has_value();
+    }
+
     void context::init_vulkan()
     {
         vk::ApplicationInfo app_info(this->window_name.c_str(),
@@ -55,35 +83,32 @@ namespace gfx
             throw std::runtime_error("failed to find a suitable device.");
         }
 
-        vk::DeviceCreateInfo deviceCreateInfo({}, 0, nullptr, 0, nullptr);
-        vk::UniqueDevice device = physical_device->createDeviceUnique(deviceCreateInfo);
-    }
+        vk::DeviceCreateInfo device_create_info({}, 0, nullptr, 0, nullptr);
+        vk::UniqueDevice device = physical_device->createDeviceUnique(device_create_info);
 
-    gfx::queue_family_indices find_queue_families(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
-    {
-        std::vector<vk::QueueFamilyProperties> queue_family_properties = device->getQueueFamilyProperties();
+        gfx::queue_family_indices indices = gfx::find_queue_families(
+            physical_device, this->flag_bits);
 
-        gfx::queue_family_indices indices;
-        uint32_t i = 0;
+        auto queue_priority = 1.0f;
+        vk::DeviceQueueCreateInfo queue_create_info({}, indices.graphics_family.value(), 1);
+        queue_create_info.pQueuePriorities = &queue_priority;
 
-        for (const auto &queue_family : queue_family_properties)
-        {
-            if (indices.graphics_family.has_value())
-            {
-                break;
-            }
+        vk::PhysicalDeviceFeatures features {};
+        vk::DeviceCreateInfo physical_create_info(
+            vk::DeviceCreateFlags(), // flags
+            1, // queueCreateInfoCount
+            &queue_create_info, // pQueueCreateInfos
+            static_cast<uint32_t>(validationLayers.size()), // enabledLayerCount
+            nullptr, // ppEnabledLayerNames
+            0, // enabledExtensionCount
+            validationLayers.data(), // ppEnabledExtensionNames
+            &features // pEnabledFeatures
+        );
 
-            if (queue_family.queueFlags & flag_bits)
-            {
-                indices.graphics_family = i;
-            }
-        }
+        vk::UniqueDevice unique_device = physical_device->createDeviceUnique(physical_create_info);
+        vk::Queue queue = unique_device->getQueue(indices.graphics_family.value(), 0, this->graphics_queue);
 
-        return indices;
-    }
-
-    bool is_device_suitable(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
-    {
-        return gfx::find_queue_families(device, flag_bits).graphics_family.has_value();
+        // set graphics_queue to the queue retrieved from the "logical device"
+        this->graphics_queue = queue;
     }
 }

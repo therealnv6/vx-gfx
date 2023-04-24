@@ -24,6 +24,7 @@ namespace gfx
     {
     public:
         vk::QueueFlagBits flag_bits = vk::QueueFlagBits::eGraphics;
+        vk::Queue graphics_queue;
 
         GLFWwindow *window;
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
