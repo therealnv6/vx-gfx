@@ -97,14 +97,23 @@ namespace gfx
             physical_device, this->surface, this->flag_bits);
 
         auto queue_priority = 1.0f;
-        vk::DeviceQueueCreateInfo queue_create_info({}, indices.graphics_family.value(), 1);
-        queue_create_info.pQueuePriorities = &queue_priority;
 
         vk::PhysicalDeviceFeatures features {};
+
+        std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
+        std::set<uint32_t> unique_queue_families = { indices.graphics_family.value(), indices.present_family.value() };
+
+        float queuePriority = 1.0f;
+
+        for (uint32_t queue_family : unique_queue_families)
+        {
+            queue_create_infos.push_back(vk::DeviceQueueCreateInfo({}, queue_family, 1, &queue_priority));
+        }
+
         vk::DeviceCreateInfo physical_create_info(
             vk::DeviceCreateFlags(), // flags
-            1, // queueCreateInfoCount
-            &queue_create_info, // pQueueCreateInfos
+            static_cast<uint32_t>(queue_create_infos.size()), // queueCreateInfoCount
+            queue_create_infos.data(), // pQueueCreateInfos
             static_cast<uint32_t>(validationLayers.size()), // enabledLayerCount
             nullptr, // ppEnabledLayerNames
             0, // enabledExtensionCount
@@ -113,10 +122,10 @@ namespace gfx
         );
 
         vk::UniqueDevice unique_device = physical_device->createDeviceUnique(physical_create_info);
-        vk::Queue queue = unique_device->getQueue(indices.graphics_family.value(), 0, this->graphics_queue);
 
-        // set graphics_queue to the queue retrieved from the "logical device"
-        this->graphics_queue = queue;
+        // set graphics_queue and present_queue to the queue retrieved from the "logical device"
+        this->graphics_queue = unique_device->getQueue(indices.graphics_family.value(), 0, this->graphics_queue);
+        this->present_queue = unique_device->getQueue(indices.present_family.value(), 0, this->graphics_queue);
     }
 
     void context::create_surface()
@@ -128,5 +137,4 @@ namespace gfx
             throw std::runtime_error("failed to create window surface!");
         }
     }
-
 }
