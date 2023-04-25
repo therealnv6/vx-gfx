@@ -74,58 +74,30 @@ namespace gfx
         vk::UniqueInstance instance = vk::createInstanceUnique(create_info);
 
         std::vector<vk::PhysicalDevice> devices = instance->enumeratePhysicalDevices();
-        std::optional<vk::PhysicalDevice> physical_device = nullptr;
+
+        vk::DeviceQueueCreateInfo queue_create_info({}, 0, 1);
+        vk::PhysicalDeviceFeatures features {};
+
+        // we have to create the surface before we instantiate the queues
+        this->create_surface();
 
         for (const auto &device : devices)
         {
             if (this->device_suitable(device))
             {
-                physical_device = device;
+                gfx::queue_family_indices indices = find_queue_families(device, this->surface, this->flag_bits);
+
+                // create the device with suitable physical device
+                vk::DeviceCreateInfo device_create_info({}, 1, &queue_create_info);
+                vk::UniqueDevice unique_device = device.createDeviceUnique(device_create_info);
+
+                // set graphics_queue and present_queue to the queue retrieved from the "logical device"
+                this->graphics_queue = unique_device->getQueue(indices.graphics_family.value(), 0, this->graphics_queue);
+                this->present_queue = unique_device->getQueue(indices.present_family.value(), 0, this->graphics_queue);
+
                 break;
             }
         }
-
-        if (!physical_device.has_value())
-        {
-            throw std::runtime_error("failed to find a suitable device.");
-        }
-
-        vk::DeviceCreateInfo device_create_info({}, 0, nullptr, 0, nullptr);
-        vk::UniqueDevice device = physical_device->createDeviceUnique(device_create_info);
-
-        gfx::queue_family_indices indices = gfx::find_queue_families(
-            physical_device, this->surface, this->flag_bits);
-
-        auto queue_priority = 1.0f;
-
-        vk::PhysicalDeviceFeatures features {};
-
-        std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
-        std::set<uint32_t> unique_queue_families = { indices.graphics_family.value(), indices.present_family.value() };
-
-        float queuePriority = 1.0f;
-
-        for (uint32_t queue_family : unique_queue_families)
-        {
-            queue_create_infos.push_back(vk::DeviceQueueCreateInfo({}, queue_family, 1, &queue_priority));
-        }
-
-        vk::DeviceCreateInfo physical_create_info(
-            vk::DeviceCreateFlags(), // flags
-            static_cast<uint32_t>(queue_create_infos.size()), // queueCreateInfoCount
-            queue_create_infos.data(), // pQueueCreateInfos
-            static_cast<uint32_t>(validationLayers.size()), // enabledLayerCount
-            nullptr, // ppEnabledLayerNames
-            0, // enabledExtensionCount
-            validationLayers.data(), // ppEnabledExtensionNames
-            &features // pEnabledFeatures
-        );
-
-        vk::UniqueDevice unique_device = physical_device->createDeviceUnique(physical_create_info);
-
-        // set graphics_queue and present_queue to the queue retrieved from the "logical device"
-        this->graphics_queue = unique_device->getQueue(indices.graphics_family.value(), 0, this->graphics_queue);
-        this->present_queue = unique_device->getQueue(indices.present_family.value(), 0, this->graphics_queue);
     }
 
     void context::create_surface()
