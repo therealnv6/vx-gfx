@@ -2,7 +2,10 @@ BasedOnStyle: WebKit
 BreakBeforeBraces: Allman
 CompactNamespaces: false
 Cpp11BracedListStyle: false
+AllowShortLambdasOnASingleLine: All
+
 IndentCaseBlocks: true
+LambdaBodyIndentation: Signature
 Language: Cpp
 NamespaceIndentation: All
 PointerAlignment: Right
@@ -16,3 +19,5 @@ SpacesInParentheses: false
 Standard: Latest
 TabWidth: 4
 UseTab: Never
+BraceWrapping:
+  BeforeLambdaBody: true

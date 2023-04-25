@@ -1,5 +1,5 @@
 # vx-gfx
-A minimal voxel game (engine) written in C++ with Vulkan.
+A minimal voxel game (engine) written in C++ with Vulkan. Currently still following [vulkan-tutorial](https://vulkan-tutorial.com/), with adjustments to follow a friendlier structure and to use Vulkan-Hpp.
 
 # About
 ### Plans

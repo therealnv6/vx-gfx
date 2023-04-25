@@ -12,9 +12,15 @@
 #include <vulkan/vulkan.hpp> // modern c++!
 
 #include <optional>
+#include <ranges>
 #include <set>
+
 namespace gfx
 {
+    static const std::vector<const char *> device_extensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
+
     struct queue_family_indices
     {
         std::optional<uint32_t> graphics_family;
@@ -23,6 +29,18 @@ namespace gfx
         bool is_complete()
         {
             return graphics_family.has_value() && present_family.has_value();
+        }
+    };
+
+    struct swapchain_support_details
+    {
+        vk::SurfaceCapabilitiesKHR capabilities;
+        std::vector<vk::SurfaceFormatKHR> formats;
+        std::vector<vk::PresentModeKHR> present_modes;
+
+        bool is_complete()
+        {
+            return !this->formats.empty() && !this->present_modes.empty();
         }
     };
 

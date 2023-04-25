@@ -12,13 +12,25 @@ int main()
         gfx::context context(800, 600, "vx-gfx");
         context.device_suitable = [](vk::PhysicalDevice device)
         {
-            vk::PhysicalDeviceProperties properties;
-            device.getProperties<vk::DispatchLoaderStatic>(&properties);
+            vk::PhysicalDeviceProperties properties = device.getProperties<vk::DispatchLoaderStatic>();
+            vk::PhysicalDeviceFeatures features = device.getFeatures<vk::DispatchLoaderStatic>();
 
-            vk::PhysicalDeviceFeatures features;
-            device.getFeatures<vk::DispatchLoaderStatic>(&features);
+            std::vector<vk::ExtensionProperties> available_extensions = device.enumerateDeviceExtensionProperties();
+            std::set<std::string> required_extensions(gfx::device_extensions.begin(), gfx::device_extensions.end());
 
-            return properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu && features.geometryShader;
+            // .clang-format doesn't like me here :(
+            std::erase_if(required_extensions, [&available_extensions](const std::string &x)
+                { return std::none_of(available_extensions.begin(), available_extensions.end(), [&x](const vk::ExtensionProperties &ext)
+                      { return x == ext.extensionName; }); });
+
+            for (const auto &extension : available_extensions)
+            {
+                required_extensions.erase(extension.extensionName);
+            }
+
+            return properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu
+                && features.geometryShader
+                && required_extensions.empty();
         };
 
         gfx::framework framework(context.window);

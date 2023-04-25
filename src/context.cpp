@@ -57,9 +57,18 @@ namespace gfx
         return indices;
     }
 
+    gfx::swapchain_support_details query_swapchain_support(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR surface)
+    {
+        return gfx::swapchain_support_details {
+            .capabilities = device->getSurfaceCapabilitiesKHR(surface),
+            .formats = device->getSurfaceFormatsKHR(surface),
+            .present_modes = device->getSurfacePresentModesKHR(surface),
+        };
+    }
+
     bool is_device_suitable(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR surface, const vk::QueueFlagBits flag_bits)
     {
-        return gfx::find_queue_families(device, surface, flag_bits).is_complete();
+        return gfx::find_queue_families(device, surface, flag_bits).is_complete() && gfx::query_swapchain_support(device, surface).is_complete();
     }
 
     void context::init_vulkan()
@@ -68,9 +77,8 @@ namespace gfx
             VK_MAKE_VERSION(1, 0, 0), "No Engine",
             VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
 
-        std::vector<const char *> validationLayers;
-
-        vk::InstanceCreateInfo create_info({}, &app_info, (uint32_t) validationLayers.size());
+        std::vector<std::string> validation_layers;
+        vk::InstanceCreateInfo create_info({}, &app_info, (uint32_t) validation_layers.size());
         vk::UniqueInstance instance = vk::createInstanceUnique(create_info);
 
         std::vector<vk::PhysicalDevice> devices = instance->enumeratePhysicalDevices();
@@ -89,6 +97,11 @@ namespace gfx
 
                 // create the device with suitable physical device
                 vk::DeviceCreateInfo device_create_info({}, 1, &queue_create_info);
+
+                // enable the device extensions required
+                device_create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
+                device_create_info.ppEnabledExtensionNames = device_extensions.data();
+
                 vk::UniqueDevice unique_device = device.createDeviceUnique(device_create_info);
 
                 // set graphics_queue and present_queue to the queue retrieved from the "logical device"
