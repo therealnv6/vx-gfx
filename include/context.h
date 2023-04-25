@@ -57,6 +57,24 @@ namespace gfx
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
         { return true; };
 
+        std::function<vk::SurfaceFormatKHR(std::vector<vk::SurfaceFormatKHR> &available_formats)> choose_swap_surface = [](std::vector<vk::SurfaceFormatKHR> &available_formats)
+        {
+            for (const auto &available_format : available_formats)
+            {
+                if (available_format.format == vk::Format::eB8G8R8A8Srgb && available_format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+                {
+                    return available_format;
+                }
+            }
+
+            return available_formats[0];
+        };
+
+        std::function<vk::PresentModeKHR(const std::vector<vk::PresentModeKHR> &available_present_modes)> choose_present_mode = [](const std::vector<vk::PresentModeKHR> &available_present_modes)
+        {
+            return vk::PresentModeKHR::eImmediate;
+        };
+
         context(uint32_t width, uint32_t height, const char *name);
         context(const context &) = delete;
 
