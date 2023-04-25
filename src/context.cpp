@@ -92,8 +92,8 @@ namespace gfx
                 vk::UniqueDevice unique_device = device.createDeviceUnique(device_create_info);
 
                 // set graphics_queue and present_queue to the queue retrieved from the "logical device"
-                this->graphics_queue = unique_device->getQueue(indices.graphics_family.value(), 0, this->graphics_queue);
-                this->present_queue = unique_device->getQueue(indices.present_family.value(), 0, this->graphics_queue);
+                this->graphics_queue = unique_device->getQueue(indices.graphics_family.value(), 0);
+                this->present_queue = unique_device->getQueue(indices.present_family.value(), 0);
 
                 break;
             }

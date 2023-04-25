@@ -23,7 +23,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include
     ${CMAKE_CURRENT_BINARY_DIR}
-    "thirdparty/Vulkan-Headers/include/"
+    # "thirdparty/Vulkan-Headers/include/"
     "thirdparty/glfw/include/"
 )
 
