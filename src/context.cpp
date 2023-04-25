@@ -14,6 +14,8 @@ namespace gfx
 
     context::~context()
     {
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(this->window);
         glfwTerminate();
     }
@@ -27,7 +29,7 @@ namespace gfx
         this->window = glfwCreateWindow(width, height, this->window_name.c_str(), nullptr, nullptr);
     }
 
-    gfx::queue_family_indices find_queue_families(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
+    gfx::queue_family_indices find_queue_families(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR surface, const vk::QueueFlagBits flag_bits)
     {
         std::vector<vk::QueueFamilyProperties> queue_family_properties = device->getQueueFamilyProperties();
         gfx::queue_family_indices indices;
@@ -36,7 +38,7 @@ namespace gfx
 
         for (const auto &queue_family : queue_family_properties)
         {
-            if (indices.graphics_family.has_value())
+            if (indices.is_complete())
             {
                 break;
             }
@@ -44,15 +46,20 @@ namespace gfx
             if (queue_family.queueFlags & flag_bits)
             {
                 indices.graphics_family = i;
+
+                if (device->getSurfaceSupportKHR(i, surface))
+                {
+                    indices.present_family = i;
+                }
             }
         }
 
         return indices;
     }
 
-    bool is_device_suitable(std::optional<vk::PhysicalDevice> device, const vk::QueueFlagBits flag_bits)
+    bool is_device_suitable(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR surface, const vk::QueueFlagBits flag_bits)
     {
-        return gfx::find_queue_families(device, flag_bits).graphics_family.has_value();
+        return gfx::find_queue_families(device, surface, flag_bits).is_complete();
     }
 
     void context::init_vulkan()
@@ -87,7 +94,7 @@ namespace gfx
         vk::UniqueDevice device = physical_device->createDeviceUnique(device_create_info);
 
         gfx::queue_family_indices indices = gfx::find_queue_families(
-            physical_device, this->flag_bits);
+            physical_device, this->surface, this->flag_bits);
 
         auto queue_priority = 1.0f;
         vk::DeviceQueueCreateInfo queue_create_info({}, indices.graphics_family.value(), 1);
@@ -111,4 +118,15 @@ namespace gfx
         // set graphics_queue to the queue retrieved from the "logical device"
         this->graphics_queue = queue;
     }
+
+    void context::create_surface()
+    {
+        auto surface = static_cast<VkSurfaceKHR>(this->surface);
+
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create window surface!");
+        }
+    }
+
 }

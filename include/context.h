@@ -18,15 +18,24 @@ namespace gfx
     struct queue_family_indices
     {
         std::optional<uint32_t> graphics_family;
+        std::optional<uint32_t> present_family;
+
+        bool is_complete()
+        {
+            return graphics_family.has_value() && present_family.has_value();
+        }
     };
 
     class context
     {
     public:
         vk::QueueFlagBits flag_bits = vk::QueueFlagBits::eGraphics;
+
+        vk::Queue present_queue;
         vk::Queue graphics_queue;
 
         GLFWwindow *window;
+
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
         { return true; };
 
@@ -49,10 +58,13 @@ namespace gfx
         std::string window_name;
 
         // vulkan objects
-        VkInstance instance;
+        vk::Instance instance;
+        vk::SurfaceKHR surface;
+
         static context *current_context;
 
         void init_window();
         void init_vulkan();
+        void create_surface();
     };
 }
