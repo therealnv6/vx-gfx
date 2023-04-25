@@ -21,6 +21,12 @@ namespace gfx
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
+    typedef vk::PresentModeKHR present_mode;
+    typedef vk::SurfaceFormatKHR surface_format;
+
+    typedef std::vector<present_mode> present_modes;
+    typedef std::vector<surface_format> surface_formats;
+
     struct queue_family_indices
     {
         std::optional<uint32_t> graphics_family;
@@ -55,9 +61,11 @@ namespace gfx
         GLFWwindow *window;
 
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
-        { return true; };
+        {
+            return true;
+        };
 
-        std::function<vk::SurfaceFormatKHR(std::vector<vk::SurfaceFormatKHR> &available_formats)> choose_swap_surface = [](std::vector<vk::SurfaceFormatKHR> &available_formats)
+        std::function<gfx::surface_format(gfx::surface_formats &available_formats)> choose_swap_surface = [](gfx::surface_formats &available_formats)
         {
             for (const auto &available_format : available_formats)
             {
@@ -70,9 +78,9 @@ namespace gfx
             return available_formats[0];
         };
 
-        std::function<vk::PresentModeKHR(const std::vector<vk::PresentModeKHR> &available_present_modes)> choose_present_mode = [](const std::vector<vk::PresentModeKHR> &available_present_modes)
+        std::function<gfx::present_mode(const gfx::present_modes &available_present_modes)> choose_present_mode = [](const gfx::present_modes &available_present_modes)
         {
-            return vk::PresentModeKHR::eImmediate;
+            return gfx::present_mode::eImmediate;
         };
 
         context(uint32_t width, uint32_t height, const char *name);

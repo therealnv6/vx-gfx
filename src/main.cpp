@@ -10,6 +10,12 @@ int main()
     try
     {
         gfx::context context(800, 600, "vx-gfx");
+
+        context.choose_present_mode = [](const gfx::present_modes)
+        {
+            return gfx::present_mode::eImmediate;
+        };
+
         context.device_suitable = [](vk::PhysicalDevice device)
         {
             vk::PhysicalDeviceProperties properties = device.getProperties<vk::DispatchLoaderStatic>();
@@ -17,11 +23,6 @@ int main()
 
             std::vector<vk::ExtensionProperties> available_extensions = device.enumerateDeviceExtensionProperties();
             std::set<std::string> required_extensions(gfx::device_extensions.begin(), gfx::device_extensions.end());
-
-            // .clang-format doesn't like me here :(
-            std::erase_if(required_extensions, [&available_extensions](const std::string &x)
-                { return std::none_of(available_extensions.begin(), available_extensions.end(), [&x](const vk::ExtensionProperties &ext)
-                      { return x == ext.extensionName; }); });
 
             for (const auto &extension : available_extensions)
             {
