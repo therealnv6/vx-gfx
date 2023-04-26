@@ -14,6 +14,8 @@ namespace gfx
 
     context::~context()
     {
+        device->destroySwapchainKHR(this->swap_chain, nullptr);
+
         vkDestroySurfaceKHR(instance, surface, nullptr);
         vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(this->window);
@@ -93,6 +95,8 @@ namespace gfx
         {
             if (this->device_suitable(device))
             {
+                this->physical_device = device;
+
                 gfx::queue_family_indices indices = find_queue_families(device, this->surface, this->flag_bits);
 
                 // create the device with suitable physical device
@@ -107,10 +111,13 @@ namespace gfx
                 // set graphics_queue and present_queue to the queue retrieved from the "logical device"
                 this->graphics_queue = unique_device->getQueue(indices.graphics_family.value(), 0);
                 this->present_queue = unique_device->getQueue(indices.present_family.value(), 0);
+                this->device = std::move(unique_device);
 
                 break;
             }
         }
+
+        this->create_swap_chain();
     }
 
     void context::create_surface()
@@ -120,6 +127,68 @@ namespace gfx
         if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create window surface!");
+        }
+    }
+
+    void context::create_swap_chain()
+    {
+        gfx::swapchain_support_details details = query_swapchain_support(this->physical_device, surface);
+
+        vk::SurfaceFormatKHR surface_format = choose_swap_surface(details.formats);
+        vk::PresentModeKHR present_mode = choose_present_mode(details.present_modes);
+        vk::Extent2D extent = choose_swap_extent(details.capabilities);
+
+        uint32_t image_count = std::max(details.capabilities.minImageCount + 1, details.capabilities.maxImageCount);
+
+        vk::SwapchainCreateInfoKHR create_info(vk::SwapchainCreateFlagBitsKHR::eMutableFormat, this->surface, image_count, surface_format.format, surface_format.colorSpace, extent, 1, vk::ImageUsageFlagBits::eColorAttachment);
+        gfx::queue_family_indices indices = find_queue_families(this->physical_device, this->surface, this->flag_bits);
+        uint32_t queue_family_indices[] = { indices.graphics_family.value(), indices.present_family.value() };
+
+        if (indices.graphics_family != indices.present_family)
+        {
+            create_info.imageSharingMode = vk::SharingMode::eConcurrent;
+            create_info.queueFamilyIndexCount = 2;
+            create_info.pQueueFamilyIndices = queue_family_indices;
+        }
+        else
+        {
+            create_info.imageSharingMode = vk::SharingMode::eExclusive;
+        }
+
+        create_info.imageExtent = extent;
+        create_info.preTransform = details.capabilities.currentTransform;
+        create_info.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+        create_info.presentMode = present_mode;
+        create_info.clipped = true;
+
+        this->swap_chain = device->createSwapchainKHR(create_info, nullptr);
+        this->images = device->getSwapchainImagesKHR(this->swap_chain);
+
+        this->swap_chain_image_format = surface_format.format;
+        this->swap_chain_extent = extent;
+    }
+
+    vk::Extent2D context::choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities)
+    {
+        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+        {
+            return capabilities.currentExtent;
+        }
+        else
+        {
+            int width;
+            int height;
+            glfwGetFramebufferSize(window, &width, &height);
+
+            VkExtent2D actualExtent = {
+                static_cast<uint32_t>(width),
+                static_cast<uint32_t>(height)
+            };
+
+            actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+            actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+            return actualExtent;
         }
     }
 }

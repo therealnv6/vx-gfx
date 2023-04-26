@@ -5,6 +5,7 @@ A minimal voxel game (engine) written in C++ with Vulkan. Currently still follow
 ### Plans
 
 - [ ] ECS (maybe [EnTT](https://github.com/skypjack/entt), or make my own)
+- [ ] Convert to [glfw.hpp](https://github.com/gnzlbg/glfw/blob/master/include/glfw/glfw.hpp)
 - [ ] Support
   - [x] [Windows]()
   - [ ] Linux (untested)

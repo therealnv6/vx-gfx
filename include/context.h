@@ -11,6 +11,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan.hpp> // modern c++!
 
+#include <limits>
 #include <optional>
 #include <ranges>
 #include <set>
@@ -102,13 +103,26 @@ namespace gfx
         std::string window_name;
 
         // vulkan objects
+        vk::SwapchainKHR swap_chain;
         vk::Instance instance;
         vk::SurfaceKHR surface;
+
+        std::vector<vk::Image> images;
+
+        vk::Format swap_chain_image_format;
+        vk::Extent2D swap_chain_extent;
+
+        // devices
+        vk::UniqueDevice device;
+        std::optional<vk::PhysicalDevice> physical_device;
 
         static context *current_context;
 
         void init_window();
         void init_vulkan();
         void create_surface();
+        void create_swap_chain();
+
+        vk::Extent2D choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities);
     };
 }
