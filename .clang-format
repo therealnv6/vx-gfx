@@ -3,7 +3,6 @@ BreakBeforeBraces: Allman
 CompactNamespaces: false
 Cpp11BracedListStyle: false
 AllowShortLambdasOnASingleLine: All
-
 IndentCaseBlocks: true
 LambdaBodyIndentation: Signature
 Language: Cpp

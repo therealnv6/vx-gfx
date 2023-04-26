@@ -14,6 +14,11 @@ namespace gfx
 
     context::~context()
     {
+        for (auto image_view : this->swap_chain_image_views)
+        {
+            device->destroyImageView(image_view);
+        }
+
         device->destroySwapchainKHR(this->swap_chain, nullptr);
 
         vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -73,7 +78,7 @@ namespace gfx
         return gfx::find_queue_families(device, surface, flag_bits).is_complete() && gfx::query_swapchain_support(device, surface).is_complete();
     }
 
-    void context::init_vulkan()
+    void context::setup_vulkan_device()
     {
         vk::ApplicationInfo app_info(this->window_name.c_str(),
             VK_MAKE_VERSION(1, 0, 0), "No Engine",
@@ -162,10 +167,45 @@ namespace gfx
         create_info.clipped = true;
 
         this->swap_chain = device->createSwapchainKHR(create_info, nullptr);
-        this->images = device->getSwapchainImagesKHR(this->swap_chain);
+        this->swap_chain_images = device->getSwapchainImagesKHR(this->swap_chain);
 
         this->swap_chain_image_format = surface_format.format;
         this->swap_chain_extent = extent;
+    }
+
+    void context::create_image_views()
+    {
+        this->swap_chain_image_views.resize(this->swap_chain_images.size());
+
+        for (auto i = 0; i < this->swap_chain_images.size(); i++)
+        {
+            vk::ImageViewCreateFlags flags = vk::ImageViewCreateFlagBits::eFragmentDensityMapDeferredEXT;
+            vk::Image image = this->swap_chain_images[i];
+            vk::ImageViewType viewType = vk::ImageViewType::e2D;
+            vk::Format format = swap_chain_image_format;
+            vk::ComponentMapping componentMapping = vk::ComponentMapping(
+                vk::ComponentSwizzle::eIdentity,
+                vk::ComponentSwizzle::eIdentity,
+                vk::ComponentSwizzle::eIdentity,
+                vk::ComponentSwizzle::eIdentity);
+
+            vk::ImageSubresourceRange subresourceRange = vk::ImageSubresourceRange(
+                vk::ImageAspectFlagBits::eColor,
+                0,
+                1,
+                0,
+                1);
+
+            vk::ImageViewCreateInfo createInfo(
+                flags,
+                image,
+                viewType,
+                format,
+                componentMapping,
+                subresourceRange);
+
+            swap_chain_image_views[i] = device->createImageView(createInfo);
+        }
     }
 
     vk::Extent2D context::choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities)
@@ -180,7 +220,7 @@ namespace gfx
             int height;
             glfwGetFramebufferSize(window, &width, &height);
 
-            VkExtent2D actualExtent = {
+            vk::Extent2D actualExtent = {
                 static_cast<uint32_t>(width),
                 static_cast<uint32_t>(height)
             };

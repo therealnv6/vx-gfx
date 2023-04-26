@@ -107,11 +107,11 @@ namespace gfx
         vk::Instance instance;
         vk::SurfaceKHR surface;
 
-        std::vector<vk::Image> images;
+        std::vector<vk::Image> swap_chain_images;
+        std::vector<vk::ImageView> swap_chain_image_views;
 
         vk::Format swap_chain_image_format;
         vk::Extent2D swap_chain_extent;
-
         // devices
         vk::UniqueDevice device;
         std::optional<vk::PhysicalDevice> physical_device;
@@ -119,9 +119,10 @@ namespace gfx
         static context *current_context;
 
         void init_window();
-        void init_vulkan();
+        void setup_vulkan_device();
         void create_surface();
         void create_swap_chain();
+        void create_image_views();
 
         vk::Extent2D choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities);
     };
