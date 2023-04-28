@@ -59,6 +59,20 @@ namespace gfx
         vk::Queue present_queue;
         vk::Queue graphics_queue;
 
+        // vulkan objects
+        vk::SwapchainKHR swap_chain;
+        vk::Instance instance;
+        vk::SurfaceKHR surface;
+
+        std::vector<vk::Image> swap_chain_images;
+        std::vector<vk::ImageView> swap_chain_image_views;
+
+        vk::Format swap_chain_image_format;
+        vk::Extent2D swap_chain_extent;
+        // devices
+        vk::UniqueDevice device;
+        std::optional<vk::PhysicalDevice> physical_device;
+
         GLFWwindow *window;
 
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
@@ -89,8 +103,6 @@ namespace gfx
 
         ~context();
 
-        context &operator=(const context &) = delete;
-
         static context &current()
         {
             return *context::current_context;
@@ -101,20 +113,6 @@ namespace gfx
         const uint32_t height;
 
         std::string window_name;
-
-        // vulkan objects
-        vk::SwapchainKHR swap_chain;
-        vk::Instance instance;
-        vk::SurfaceKHR surface;
-
-        std::vector<vk::Image> swap_chain_images;
-        std::vector<vk::ImageView> swap_chain_image_views;
-
-        vk::Format swap_chain_image_format;
-        vk::Extent2D swap_chain_extent;
-        // devices
-        vk::UniqueDevice device;
-        std::optional<vk::PhysicalDevice> physical_device;
 
         static context *current_context;
 
