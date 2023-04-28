@@ -16,8 +16,9 @@ namespace gfx
     class pipeline
     {
     public:
-        pipeline(gfx::context &context, const std::string &vertex_file_path, const std::string &fragment_file_path);
+        vk::PipelineLayout pipeline_layout;
 
+        pipeline(gfx::context &context, const std::string &vertex_file_path, const std::string &fragment_file_path);
         vk::ShaderModule create_shader_module(gfx::context &context, const std::vector<char> &code);
 
     private:

@@ -90,5 +90,38 @@ namespace gfx
             1, // scissorCount
             &scissor // pScissors
         );
+
+        vk::PipelineRasterizationStateCreateInfo rasterizer({},
+            false, // depthClampEnable
+            false, // rasterizerDiscardEnable
+            vk::PolygonMode::eFill, // polygonMode
+            vk::CullModeFlagBits::eBack, // cullMode
+            vk::FrontFace::eClockwise, // frontFace
+            false, // depthBiasEnable
+            0.0f, // depthBiasConstantFactor
+            0.0f, // depthBiasClamp
+            0.0f // depthBiasSlopeFactor
+        );
+
+        vk::PipelineMultisampleStateCreateInfo multisampling({}, vk::SampleCountFlagBits::e1, false);
+        vk::PipelineColorBlendAttachmentState color_blend_attachment(true, vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd, vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd);
+        color_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
+            | vk::ColorComponentFlagBits::eG
+            | vk::ColorComponentFlagBits::eB
+            | vk::ColorComponentFlagBits::eA;
+
+        color_blend_attachment.blendEnable = false;
+
+        vk::PipelineColorBlendStateCreateInfo colorBlending(
+            {}, // flags
+            VK_FALSE, // logicOpEnable
+            vk::LogicOp::eCopy, // logicOp (optional)
+            1, // attachmentCount
+            &color_blend_attachment, // pAttachments
+            { 0.0f, 0.0f, 0.0f, 0.0f } // blendConstants (optional)
+        );
+
+        vk::PipelineLayoutCreateInfo pipeline_layout_info;
+        this->pipeline_layout = context.device->createPipelineLayout(pipeline_layout_info);
     }
 }
