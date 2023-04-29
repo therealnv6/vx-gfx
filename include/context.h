@@ -1,5 +1,4 @@
 #pragma once
-
 #define GLFW_INCLUDE_VULKAN
 
 #include <cstdlib>
@@ -16,10 +15,36 @@
 #include <ranges>
 #include <set>
 
+inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
+{
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    if (func != nullptr)
+    {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }
+    else
+    {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+}
+
+inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
+{
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    if (func != nullptr)
+    {
+        func(instance, debugMessenger, pAllocator);
+    }
+}
+
 namespace gfx
 {
     static const std::vector<const char *> device_extensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    };
+
+    static const std::vector<const char *> validation_layers = {
+        "VK_LAYER_KHRONOS_validation"
     };
 
     typedef vk::PresentModeKHR present_mode;
@@ -51,6 +76,13 @@ namespace gfx
         }
     };
 
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
+    {
+        std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+
+        return VK_FALSE;
+    }
+
     class context
     {
     public:
@@ -74,6 +106,7 @@ namespace gfx
         std::optional<vk::PhysicalDevice> physical_device;
 
         GLFWwindow *window;
+        vk::DebugUtilsMessengerEXT debug_messenger;
 
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
         {
@@ -108,9 +141,82 @@ namespace gfx
             return *context::current_context;
         }
 
+        void setup_debug_messenger()
+        {
+            if (!enable_validation_layers)
+            {
+                return;
+            }
+
+            typedef vk::DebugUtilsMessageSeverityFlagBitsEXT severity;
+            typedef vk::DebugUtilsMessageTypeFlagBitsEXT type;
+
+            vk::DebugUtilsMessengerCreateInfoEXT createInfo({},
+                severity::eInfo | severity::eWarning | severity::eError | severity::eWarning, // messageSeverity
+                type::eGeneral | type::eValidation | type::ePerformance, // messageType
+                gfx::debug_callback // pfnUserCallback
+            );
+
+            auto leg_vk = static_cast<VkDebugUtilsMessengerCreateInfoEXT>(createInfo);
+            auto oth_leg_vk = static_cast<VkDebugUtilsMessengerEXT>(debug_messenger);
+
+            auto result = create_debug_utils_messenger(this->instance, &leg_vk, nullptr, &oth_leg_vk);
+
+            if (result != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to set up debug messenger: " + std::to_string(result));
+            }
+        }
+
+        std::vector<const char *> get_required_extensions()
+        {
+            uint32_t glfw_extension_count = 0;
+            const char **glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+
+            std::vector<const char *> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
+
+            if (enable_validation_layers)
+            {
+                extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+            }
+
+            return extensions;
+        }
+
+        bool check_validation_support()
+        {
+            uint32_t layerCount;
+            vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+            std::vector<VkLayerProperties> availableLayers(layerCount);
+            vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+            for (const char *layerName : validation_layers)
+            {
+                bool layerFound = false;
+
+                for (const auto &layerProperties : availableLayers)
+                {
+                    if (strcmp(layerName, layerProperties.layerName) == 0)
+                    {
+                        layerFound = true;
+                        break;
+                    }
+                }
+
+                if (!layerFound)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
     private:
         const uint32_t width;
         const uint32_t height;
+        const bool enable_validation_layers = false;
 
         std::string window_name;
 

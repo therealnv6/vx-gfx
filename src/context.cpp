@@ -10,6 +10,7 @@ namespace gfx
     {
         gfx::context::current_context = this;
         this->init_window();
+        this->setup_vulkan_device();
     }
 
     context::~context()
@@ -80,18 +81,53 @@ namespace gfx
 
     void context::setup_vulkan_device()
     {
+        if (enable_validation_layers && !check_validation_support())
+        {
+            throw std::runtime_error("validation layers requested, but not available!");
+        }
+
         vk::ApplicationInfo app_info(this->window_name.c_str(),
             VK_MAKE_VERSION(1, 0, 0), "No Engine",
             VK_MAKE_VERSION(1, 0, 0), VK_API_VERSION_1_0);
 
-        std::vector<std::string> validation_layers;
-        vk::InstanceCreateInfo create_info({}, &app_info, (uint32_t) validation_layers.size());
-        vk::UniqueInstance instance = vk::createInstanceUnique(create_info);
+        vk::InstanceCreateInfo create_info({}, &app_info);
+        std::vector<const char *> extensions = this->get_required_extensions();
 
-        std::vector<vk::PhysicalDevice> devices = instance->enumeratePhysicalDevices();
+        create_info.enabledExtensionCount = extensions.size();
+        create_info.ppEnabledExtensionNames = extensions.data();
+
+        if (this->enable_validation_layers)
+        {
+            typedef vk::DebugUtilsMessageSeverityFlagBitsEXT severity;
+            typedef vk::DebugUtilsMessageTypeFlagBitsEXT type;
+
+            vk::DebugUtilsMessengerCreateInfoEXT debug_create_info({},
+                severity::eInfo | severity::eWarning | severity::eError | severity::eWarning, // messageSeverity
+                type::eGeneral | type::eValidation | type::ePerformance, // messageType
+                gfx::debug_callback // pfnUserCallback
+            );
+
+            create_info.enabledLayerCount = validation_layers.size();
+            create_info.ppEnabledLayerNames = validation_layers.data();
+            create_info.pNext = &debug_create_info;
+        }
+        else
+        {
+            create_info.enabledLayerCount = 0;
+            create_info.pNext = nullptr;
+        }
+
+        this->instance = vk::createInstance(create_info);
+
+        if (this->enable_validation_layers)
+        {
+            this->setup_debug_messenger();
+        }
+
+        std::vector<vk::PhysicalDevice> devices = instance.enumeratePhysicalDevices();
 
         vk::DeviceQueueCreateInfo queue_create_info({}, 0, 1);
-        vk::PhysicalDeviceFeatures features {};
+        vk::PhysicalDeviceFeatures features;
 
         // we have to create the surface before we instantiate the queues
         this->create_surface();
@@ -128,11 +164,16 @@ namespace gfx
     void context::create_surface()
     {
         auto surface = static_cast<VkSurfaceKHR>(this->surface);
+        auto result = glfwCreateWindowSurface(instance, window, nullptr, &surface);
 
-        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+        if (result != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create window surface!");
+            throw std::runtime_error("failed to create window surface: " + std::to_string(result));
         }
+
+        // sadly we have to re-assign here because this->surface is a vk::SurfaceKHR, 
+        // whereas glfwCreateWindowSurface requires a VkSurfaceKHR (not vulkan.hpp)
+        this->surface = surface;
     }
 
     void context::create_swap_chain()
