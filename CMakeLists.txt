@@ -27,18 +27,53 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "thirdparty/glfw/include/"
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw Vulkan::Vulkan dbghelp)
-
-add_custom_command(
-    TARGET voxey
-    POST_BUILD
-    COMMAND
-    ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    glfw 
+    Vulkan::Vulkan
 )
+
+IF (WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
+ENDIF()
+
+find_package(Vulkan COMPONENTS glslc)
+find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
+
+function(compile_shader target)
+    cmake_parse_arguments(PARSE_ARGV 1 arg "" "ENV" "SOURCES")
+    foreach(source ${arg_SOURCES})
+        add_custom_command(
+            OUTPUT ${source}.spv
+            DEPENDS ${source}
+            DEPFILE ${source}.d
+            COMMAND
+                ${glslc_executable}
+                $<$<BOOL:${arg_ENV}>:--target-env=${arg_ENV}>
+                -MD -MF ${source}.d
+                -Os
+                -o ${source}.spv
+                ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${source}
+        )
+        target_sources(${target} PRIVATE ${source}.spv)
+    endforeach()
+endfunction()
 
 configure_file(
     "${PROJECT_SOURCE_DIR}/include/config.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/triangle.frag
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/triangle.vert
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+compile_shader(${PROJECT_NAME}
+    ENV vulkan
+    SOURCES
+        triangle.frag
+        triangle.vert
 )

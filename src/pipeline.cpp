@@ -4,9 +4,9 @@
 
 namespace gfx
 {
-    vk::ShaderModule pipeline::create_shader_module(gfx::context &context, const std::vector<char> &code)
+    vk::ShaderModule pipeline::create_shader_module(gfx::context &context, std::vector<unsigned int> code)
     {
-        vk::ShaderModuleCreateInfo shader_create(vk::ShaderModuleCreateFlagBits {}, code.size(), reinterpret_cast<const uint32_t *>(code.data()));
+        vk::ShaderModuleCreateInfo shader_create(vk::ShaderModuleCreateFlags(), code);
         vk::ShaderModule shader_module = context.device->createShaderModule(shader_create);
 
         return shader_module;
@@ -17,22 +17,21 @@ namespace gfx
         this->create_graphics_pipeline(context, vertex_file_path, fragment_file_path);
     }
 
-    std::vector<char> read_file(const std::string &file_path)
+    std::vector<unsigned int> read_file(const std::string &file_path)
     {
-        std::ifstream file { file_path, std::ios::ate | std::ios::binary };
+        std::ifstream is;
+        std::vector<unsigned int> buffer;
 
-        if (!file.is_open())
-        {
-            throw std::runtime_error("failed to open file: " + file_path);
-        }
+        is.open(file_path, std::ios::binary);
+        is.seekg(0, std::ios::end);
 
-        size_t file_size = static_cast<size_t>(file.tellg());
-        std::vector<char> buffer(file_size);
+        size_t filesize = is.tellg();
+        is.seekg(0, std::ios::beg);
 
-        file.seekg(0);
-        file.read(buffer.data(), file_size);
+        buffer.resize(filesize / sizeof(unsigned int));
 
-        file.close();
+        is.read((char *) buffer.data(), filesize);
+
         return buffer;
     }
 
