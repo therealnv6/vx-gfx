@@ -6,7 +6,9 @@ namespace gfx
     class render_pass
     {
     public:
-        vk::RenderPass render_pass;
+        vk::RenderPass pass;
+
+        render_pass(gfx::context &context);
 
         void create_render_pass(gfx::context &context);
     };

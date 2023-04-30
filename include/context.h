@@ -41,6 +41,7 @@ namespace gfx
 {
     static const std::vector<const char *> device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME,
     };
 
     static const std::vector<const char *> validation_layers = {
@@ -216,7 +217,7 @@ namespace gfx
     private:
         const uint32_t width;
         const uint32_t height;
-        const bool enable_validation_layers = false;
+        const bool enable_validation_layers = true;
 
         std::string window_name;
 

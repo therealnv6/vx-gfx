@@ -1,6 +1,7 @@
 #include <context.h>
 #include <framework.h>
 #include <pipeline.h>
+#include <renderpass.h>
 
 int main()
 {
@@ -35,6 +36,8 @@ int main()
         };
 
         gfx::framework framework(context.window);
+        gfx::render_pass renderpass { context };
+
         gfx::pipeline pipeline { context, "triangle.vert.spv",
             "triangle.frag.spv" };
 
