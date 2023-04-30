@@ -100,7 +100,7 @@ namespace gfx
 
         std::vector<vk::Image> swap_chain_images;
         std::vector<vk::ImageView> swap_chain_image_views;
-
+        
         vk::Format swap_chain_image_format;
         vk::Extent2D swap_chain_extent;
         // devices
@@ -227,6 +227,7 @@ namespace gfx
         void create_surface();
         void create_swap_chain();
         void create_image_views();
+        void create_frame_buffers();
 
         vk::Extent2D choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities);
     };

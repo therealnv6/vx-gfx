@@ -162,5 +162,6 @@ namespace gfx
         }
 
         this->graphics_pipeline = pipeline;
+        this->render_pass.create_frame_buffers();
     }
 }
