@@ -45,7 +45,7 @@ namespace gfx
     static const std::vector<const char *> device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME,
-        VK_KHR_MAINTENANCE2_EXTENSION_NAME, 
+        VK_KHR_MAINTENANCE2_EXTENSION_NAME,
         VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
     };
 
@@ -231,15 +231,17 @@ namespace gfx
             std::function<vk::CommandBufferBeginInfo(gfx::context &context)> begin = [](gfx::context &context)
             { return vk::CommandBufferBeginInfo {}; })
         {
-            vk::ResultValue<uint32_t> image_index = device->acquireNextImageKHR(swap_chain, UINT64_MAX, image_available_semaphore);
-            vk::CommandBufferBeginInfo begin_info = begin(*this);
-
-            command_buffer.begin(begin_info);
-
             if (device->waitForFences(in_flight_fence, true, UINT64_MAX) != vk::Result::eSuccess)
             {
-                std::cerr << "unable to wait for fence in_flight_fence!" << std::endl;
+                throw std::runtime_error("unable to wait for fence in_flight_fence!");
             }
+
+            device->resetFences(in_flight_fence);
+
+            vk::ResultValue<uint32_t> image_index = device->acquireNextImageKHR(swap_chain, UINT64_MAX, image_available_semaphore);
+
+            command_buffer.reset(); // reset command buffer
+            command_buffer.begin(begin(*this));
 
             record_command_buffer(this->command_buffer, image_index.value);
 
@@ -259,7 +261,6 @@ namespace gfx
             };
 
             graphics_queue.submit(submit_info, in_flight_fence);
-            device->resetFences(in_flight_fence);
 
             vk::SwapchainKHR swap_chains[] = { swap_chain };
             vk::PresentInfoKHR present_info {
