@@ -1,4 +1,8 @@
 #include <context.h>
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace gfx
 {
@@ -15,6 +19,11 @@ namespace gfx
 
     context::~context()
     {
+        device->destroySemaphore(this->image_available_semaphore);
+        device->destroySemaphore(this->render_finished_semaphore);
+        device->destroyFence(this->in_flight_fence);
+        device->destroyCommandPool(this->command_pool);
+
         for (auto image_view : this->swap_chain_image_views)
         {
             device->destroyImageView(image_view);
@@ -171,7 +180,7 @@ namespace gfx
             throw std::runtime_error("failed to create window surface: " + std::to_string(result));
         }
 
-        // sadly we have to re-assign here because this->surface is a vk::SurfaceKHR, 
+        // sadly we have to re-assign here because this->surface is a vk::SurfaceKHR,
         // whereas glfwCreateWindowSurface requires a VkSurfaceKHR (not vulkan.hpp)
         this->surface = surface;
     }
@@ -271,5 +280,37 @@ namespace gfx
 
             return actualExtent;
         }
+    }
+
+    void context::create_command_pool()
+    {
+        gfx::queue_family_indices indices = find_queue_families(physical_device, surface, flag_bits);
+        vk::CommandPoolCreateInfo pool_info {
+            vk::CommandPoolCreateFlagBits::eResetCommandBuffer, indices.graphics_family.value()
+        };
+
+        this->command_pool = device->createCommandPool(pool_info);
+    }
+
+    void context::create_command_buffer()
+    {
+        vk::CommandBufferAllocateInfo allocate_info {
+            this->command_pool, vk::CommandBufferLevel::ePrimary, 1  
+        };
+
+        std::vector<vk::CommandBuffer> result = device->allocateCommandBuffers(allocate_info);
+        vk::CommandBuffer single = result[0];
+
+        this->command_buffer = single;
+    }
+
+    void context::create_sync_objects()
+    {
+        vk::SemaphoreCreateInfo semaphore_info;
+        vk::FenceCreateInfo fence_info { vk::FenceCreateFlagBits::eSignaled };
+
+        this->image_available_semaphore = this->device->createSemaphore(semaphore_info);
+        this->render_finished_semaphore = this->device->createSemaphore(semaphore_info);
+        this->in_flight_fence = this->device->createFence(vk::FenceCreateInfo {});
     }
 }

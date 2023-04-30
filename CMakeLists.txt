@@ -37,7 +37,6 @@ IF (WIN32)
 ENDIF()
 
 find_package(Vulkan COMPONENTS glslc)
-find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 
 function(compile_shader target)
     cmake_parse_arguments(PARSE_ARGV 1 arg "" "ENV" "SOURCES")
@@ -47,7 +46,7 @@ function(compile_shader target)
             DEPENDS ${source}
             DEPFILE ${source}.d
             COMMAND
-                ${glslc_executable}
+                glslc
                 $<$<BOOL:${arg_ENV}>:--target-env=${arg_ENV}>
                 -MD -MF ${source}.d
                 -Os
