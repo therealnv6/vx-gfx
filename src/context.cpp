@@ -205,8 +205,7 @@ namespace gfx
             surface_format.colorSpace,
             extent,
             1,
-            vk::ImageUsageFlagBits::eColorAttachment);
-
+            vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment);
         gfx::queue_family_indices indices = find_queue_families(this->physical_device, this->surface, this->flag_bits);
         uint32_t queue_family_indices[] = { indices.graphics_family.value(), indices.present_family.value() };
 
