@@ -291,7 +291,6 @@ namespace gfx
         void create_surface();
         void create_swap_chain();
         void create_image_views();
-        void create_frame_buffers();
         void create_sync_objects();
         void create_command_pool();
         void create_command_buffer();
