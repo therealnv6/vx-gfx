@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #define GLFW_INCLUDE_VULKAN
 
 #include <cstdlib>
@@ -97,18 +98,27 @@ namespace gfx
         vk::SwapchainKHR swap_chain;
         vk::Instance instance;
         vk::SurfaceKHR surface;
+        vk::DebugUtilsMessengerEXT debug_messenger;
+
+        vk::CommandPool command_pool;
+        vk::CommandBuffer command_buffer;
+
+        vk::Semaphore image_available_semaphore;
+        vk::Semaphore render_finished_semaphore;
+
+        vk::Fence in_flight_fence;
 
         std::vector<vk::Image> swap_chain_images;
         std::vector<vk::ImageView> swap_chain_image_views;
-        
+
         vk::Format swap_chain_image_format;
         vk::Extent2D swap_chain_extent;
+
         // devices
         vk::UniqueDevice device;
         std::optional<vk::PhysicalDevice> physical_device;
 
         GLFWwindow *window;
-        vk::DebugUtilsMessengerEXT debug_messenger;
 
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
         {
@@ -213,6 +223,27 @@ namespace gfx
             return true;
         }
 
+        void draw(
+            std::function<void(vk::CommandBuffer, uint32_t)> record_command_buffer, 
+            std::function<vk::CommandBufferBeginInfo(gfx::context &context)> begin = [](gfx::context &context) {
+                return vk::CommandBufferBeginInfo{};
+            }
+        )
+        {
+            vk::ResultValue<uint32_t> image_index = device->acquireNextImageKHR(swap_chain, UINT64_MAX, image_available_semaphore);
+            vk::CommandBufferBeginInfo begin_info = begin(*this);
+
+            command_buffer.begin(begin_info);
+
+            if (device->waitForFences(in_flight_fence, true, UINT64_MAX) != vk::Result::eSuccess)
+            {
+                std::cerr << "unable to wait for fence in_flight_fence!" << std::endl;
+            }
+
+            record_command_buffer(this->command_buffer, image_index.value);
+            device->resetFences(in_flight_fence);
+        }
+
     private:
         const uint32_t width;
         const uint32_t height;
@@ -228,6 +259,9 @@ namespace gfx
         void create_swap_chain();
         void create_image_views();
         void create_frame_buffers();
+        void create_sync_objects();
+        void create_command_pool();
+        void create_command_buffer();
 
         vk::Extent2D choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities);
     };
