@@ -118,12 +118,10 @@ namespace gfx
 
             create_info.enabledLayerCount = validation_layers.size();
             create_info.ppEnabledLayerNames = validation_layers.data();
-            create_info.pNext = &debug_create_info;
         }
         else
         {
             create_info.enabledLayerCount = 0;
-            create_info.pNext = nullptr;
         }
 
         this->instance = vk::createInstance(create_info);
