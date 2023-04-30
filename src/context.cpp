@@ -135,7 +135,8 @@ namespace gfx
 
         std::vector<vk::PhysicalDevice> devices = instance.enumeratePhysicalDevices();
 
-        vk::DeviceQueueCreateInfo queue_create_info({}, 0, 1);
+        float queue_priority = 1.0f;
+        vk::DeviceQueueCreateInfo queue_create_info({}, 0, 1, &queue_priority);
         vk::PhysicalDeviceFeatures features;
 
         // we have to create the surface before we instantiate the queues
@@ -198,7 +199,15 @@ namespace gfx
 
         uint32_t image_count = std::max(details.capabilities.minImageCount + 1, details.capabilities.maxImageCount);
 
-        vk::SwapchainCreateInfoKHR create_info(vk::SwapchainCreateFlagBitsKHR::eMutableFormat, this->surface, image_count, surface_format.format, surface_format.colorSpace, extent, 1, vk::ImageUsageFlagBits::eColorAttachment);
+        vk::SwapchainCreateInfoKHR create_info({},
+            this->surface,
+            image_count,
+            surface_format.format,
+            surface_format.colorSpace,
+            extent,
+            1,
+            vk::ImageUsageFlagBits::eColorAttachment);
+            
         gfx::queue_family_indices indices = find_queue_families(this->physical_device, this->surface, this->flag_bits);
         uint32_t queue_family_indices[] = { indices.graphics_family.value(), indices.present_family.value() };
 
@@ -298,7 +307,7 @@ namespace gfx
     void context::create_command_buffer()
     {
         vk::CommandBufferAllocateInfo allocate_info {
-            this->command_pool, vk::CommandBufferLevel::ePrimary, 1  
+            this->command_pool, vk::CommandBufferLevel::ePrimary, 1
         };
 
         std::vector<vk::CommandBuffer> result = device->allocateCommandBuffers(allocate_info);

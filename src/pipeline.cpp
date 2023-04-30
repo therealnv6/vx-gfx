@@ -107,7 +107,8 @@ namespace gfx
             false, // depthBiasEnable
             0.0f, // depthBiasConstantFactor
             0.0f, // depthBiasClamp
-            0.0f // depthBiasSlopeFactor
+            0.0f, // depthBiasSlopeFactor
+            1.0
         );
 
         vk::PipelineMultisampleStateCreateInfo multisampling({}, vk::SampleCountFlagBits::e1, false);
