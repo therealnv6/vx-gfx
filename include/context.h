@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 
 #include <cstdlib>
@@ -44,6 +45,8 @@ namespace gfx
     static const std::vector<const char *> device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE2_EXTENSION_NAME, 
+        VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
     };
 
     static const std::vector<const char *> validation_layers = {
