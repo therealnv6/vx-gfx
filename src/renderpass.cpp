@@ -6,15 +6,20 @@ namespace gfx
     render_pass::render_pass(std::shared_ptr<gfx::context> context)
         : context { context }
     {
-        this->create_render_pass(context);
+        this->create_render_pass();
     }
 
     render_pass::~render_pass()
     {
+        for (auto framebuffer : swap_chain_framebuffers)
+        {
+            context->device->destroyFramebuffer(framebuffer);
+        }
+
         context->device->destroyRenderPass(this->pass);
     }
 
-    void render_pass::create_render_pass(std::shared_ptr<gfx::context> context)
+    void render_pass::create_render_pass()
     {
         vk::AttachmentDescription color_attachment({},
             context->swap_chain_image_format, // format
@@ -38,5 +43,29 @@ namespace gfx
 
         this->pass = context->device->createRenderPass(
             vk::RenderPassCreateInfo({}, 1, &color_attachment, 1, &subpass));
+    }
+
+    void render_pass::create_frame_buffers()
+    {
+        swap_chain_framebuffers.resize(context->swap_chain_images.size());
+
+        for (auto i = 0; i < context->swap_chain_image_views.size(); i++)
+        {
+            vk::ImageView attachments[] = {
+                context->swap_chain_image_views[i]
+            };
+
+            vk::FramebufferCreateInfo create_info {
+                {},
+                this->pass,
+                sizeof(attachments) / sizeof(vk::ImageView),
+                attachments,
+                context->swap_chain_extent.width,
+                context->swap_chain_extent.height,
+                1
+            };
+
+            this->swap_chain_framebuffers[i] = context->device->createFramebuffer(create_info);
+        }
     }
 }
