@@ -167,6 +167,7 @@ namespace gfx
         }
 
         this->create_swap_chain();
+        this->create_image_views();
         this->create_sync_objects();
         this->create_command_pool();
         this->create_command_buffer();
@@ -239,32 +240,30 @@ namespace gfx
 
         for (auto i = 0; i < this->swap_chain_images.size(); i++)
         {
-            vk::ImageViewCreateFlags flags = vk::ImageViewCreateFlagBits::eFragmentDensityMapDeferredEXT;
             vk::Image image = this->swap_chain_images[i];
-            vk::ImageViewType viewType = vk::ImageViewType::e2D;
+            vk::ImageViewType view_type = vk::ImageViewType::e2D;
             vk::Format format = swap_chain_image_format;
-            vk::ComponentMapping componentMapping = vk::ComponentMapping(
+            vk::ComponentMapping compmonent_mapping = vk::ComponentMapping(
                 vk::ComponentSwizzle::eIdentity,
                 vk::ComponentSwizzle::eIdentity,
                 vk::ComponentSwizzle::eIdentity,
                 vk::ComponentSwizzle::eIdentity);
 
-            vk::ImageSubresourceRange subresourceRange = vk::ImageSubresourceRange(
+            vk::ImageSubresourceRange subsource_range = vk::ImageSubresourceRange(
                 vk::ImageAspectFlagBits::eColor,
                 0,
                 1,
                 0,
                 1);
 
-            vk::ImageViewCreateInfo createInfo(
-                flags,
+            vk::ImageViewCreateInfo create_info({},
                 image,
-                viewType,
+                view_type,
                 format,
-                componentMapping,
-                subresourceRange);
+                compmonent_mapping,
+                subsource_range);
 
-            swap_chain_image_views[i] = device->createImageView(createInfo);
+            swap_chain_image_views[i] = device->createImageView(create_info);
         }
     }
 
