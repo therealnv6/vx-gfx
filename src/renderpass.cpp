@@ -1,7 +1,13 @@
+#include "context.h"
 #include <renderpass.h>
 
 namespace gfx
 {
+    render_pass::render_pass(gfx::context &context)
+    {
+        this->create_render_pass(context);
+    }
+
     void render_pass::create_render_pass(gfx::context &context)
     {
         vk::AttachmentDescription color_attachment({},
@@ -22,8 +28,9 @@ namespace gfx
             color_attachment_ref // pColorAttachments
         );
         subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &color_attachment_ref;
 
-        this->render_pass = context.device->createRenderPass(
+        this->pass = context.device->createRenderPass(
             vk::RenderPassCreateInfo({}, 1, &color_attachment, 1, &subpass));
     }
 }
