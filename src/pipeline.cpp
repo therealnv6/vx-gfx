@@ -1,20 +1,27 @@
 #include <fstream>
 #include <iostream>
 #include <pipeline.h>
+#include <stdexcept>
 
 namespace gfx
 {
     vk::ShaderModule pipeline::create_shader_module(gfx::context &context, std::vector<unsigned int> code)
     {
-        vk::ShaderModuleCreateInfo shader_create(vk::ShaderModuleCreateFlags(), code);
+        vk::ShaderModuleCreateInfo shader_create({}, code);
         vk::ShaderModule shader_module = context.device->createShaderModule(shader_create);
 
         return shader_module;
     }
 
-    pipeline::pipeline(gfx::context &context, const std::string &vertex_file_path, const std::string &fragment_file_path)
+    pipeline::pipeline(std::shared_ptr<gfx::context> context, const std::string &vertex_file_path, const std::string &fragment_file_path)
+        : render_pass { gfx::render_pass(context) }
     {
         this->create_graphics_pipeline(context, vertex_file_path, fragment_file_path);
+    }
+
+    pipeline::~pipeline()
+    {
+        context->device->destroyPipeline(this->graphics_pipeline);
     }
 
     std::vector<unsigned int> read_file(const std::string &file_path)
@@ -35,26 +42,27 @@ namespace gfx
         return buffer;
     }
 
-    void pipeline::create_graphics_pipeline(gfx::context &context, const std::string &vertex_file_path, const std::string &fragment_file_path)
+    void pipeline::create_graphics_pipeline(std::shared_ptr<gfx::context> context, const std::string &vertex_file_path, const std::string &fragment_file_path)
     {
         auto vertex_code = gfx::read_file(vertex_file_path);
         auto fragment_code = gfx::read_file(fragment_file_path);
 
-        vk::ShaderModule vertex_shader = this->create_shader_module(context, vertex_code);
-        vk::ShaderModule fragment_shader = this->create_shader_module(context, fragment_code);
+        vk::ShaderModule vertex_shader = this->create_shader_module(*context, vertex_code);
+        vk::ShaderModule fragment_shader = this->create_shader_module(*context, fragment_code);
 
         vk::PipelineShaderStageCreateInfo vertex_shader_stage_info({},
             vk::ShaderStageFlagBits::eVertex, // stage
             vertex_shader, // module
-            "main" // pName
+            "main\0" // pName
         );
 
         vk::PipelineShaderStageCreateInfo fragment_shader_stage_info({},
             vk::ShaderStageFlagBits::eFragment, // stage
             fragment_shader, // module
-            "main" // pName
+            "main\0" // pName
         );
 
+        vk::PipelineShaderStageCreateInfo shader_stages[] = { fragment_shader_stage_info, vertex_shader_stage_info };
         vk::PipelineVertexInputStateCreateInfo vertex_input_info({},
             0, // vertexBindingDescriptionCount
             nullptr, // vertexBindingDescriptions
@@ -70,13 +78,13 @@ namespace gfx
         vk::Viewport viewport(
             0.0f, // x
             0.0f, // y
-            (float) context.swap_chain_extent.width, // width
-            (float) context.swap_chain_extent.height, // height
+            (float) context->swap_chain_extent.width, // width
+            (float) context->swap_chain_extent.height, // height
             0.0f, // minDepth
             1.0f // maxDepth
         );
 
-        vk::Rect2D scissor({ 0, 0 }, context.swap_chain_extent);
+        vk::Rect2D scissor({ 0, 0 }, context->swap_chain_extent);
 
         vk::PipelineDynamicStateCreateInfo dynamic_state_info({},
             static_cast<uint32_t>(gfx::dynamic_states.size()), // dynamicStateCount
@@ -121,6 +129,38 @@ namespace gfx
         );
 
         vk::PipelineLayoutCreateInfo pipeline_layout_info;
-        this->pipeline_layout = context.device->createPipelineLayout(pipeline_layout_info);
+        vk::GraphicsPipelineCreateInfo pipelineInfo {
+            {},
+            sizeof(shader_stages) / sizeof(vk::PipelineShaderStageCreateInfo),
+            shader_stages,
+            &vertex_input_info,
+            &input_assembly_info,
+            nullptr,
+            &view_port_state_info,
+            &rasterizer,
+            &multisampling,
+            nullptr,
+            &colorBlending,
+            &dynamic_state_info,
+            context->device->createPipelineLayout(pipeline_layout_info),
+        };
+
+        pipelineInfo.subpass = 0;
+        pipelineInfo.renderPass = render_pass.pass;
+        pipelineInfo.basePipelineHandle = nullptr;
+        pipelineInfo.basePipelineIndex = -1;
+
+        vk::Result result;
+        vk::Pipeline pipeline;
+
+        std::tie(result, pipeline) = context->device->createGraphicsPipeline(nullptr, pipelineInfo);
+
+        if (result != vk::Result::eSuccess)
+        {
+            std::cerr << result << std::endl;
+            throw std::runtime_error("unable to make pipeline");
+        }
+
+        this->graphics_pipeline = pipeline;
     }
 }
