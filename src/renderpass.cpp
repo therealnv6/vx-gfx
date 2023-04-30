@@ -1,5 +1,6 @@
 #include "context.h"
 #include <renderpass.h>
+#include <vulkan/vulkan_enums.hpp>
 
 namespace gfx
 {
@@ -38,11 +39,22 @@ namespace gfx
             vk::PipelineBindPoint::eGraphics, // pipelineBindPoint
             color_attachment_ref // pColorAttachments
         );
+
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &color_attachment_ref;
 
-        this->pass = context->device->createRenderPass(
-            vk::RenderPassCreateInfo({}, 1, &color_attachment, 1, &subpass));
+        vk::SubpassDependency dependency {
+            VK_SUBPASS_EXTERNAL,
+            0,
+            vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            vk::AccessFlagBits::eNone,
+            vk::AccessFlagBits::eColorAttachmentWrite,
+        };
+
+        vk::RenderPassCreateInfo info({}, 1, &color_attachment, 1, &subpass, 1, &dependency);
+
+        this->pass = context->device->createRenderPass(info);
     }
 
     void render_pass::create_frame_buffers()

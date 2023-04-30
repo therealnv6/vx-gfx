@@ -224,11 +224,9 @@ namespace gfx
         }
 
         void draw(
-            std::function<void(vk::CommandBuffer, uint32_t)> record_command_buffer, 
-            std::function<vk::CommandBufferBeginInfo(gfx::context &context)> begin = [](gfx::context &context) {
-                return vk::CommandBufferBeginInfo{};
-            }
-        )
+            std::function<void(vk::CommandBuffer, uint32_t)> record_command_buffer,
+            std::function<vk::CommandBufferBeginInfo(gfx::context &context)> begin = [](gfx::context &context)
+            { return vk::CommandBufferBeginInfo {}; })
         {
             vk::ResultValue<uint32_t> image_index = device->acquireNextImageKHR(swap_chain, UINT64_MAX, image_available_semaphore);
             vk::CommandBufferBeginInfo begin_info = begin(*this);
@@ -241,7 +239,39 @@ namespace gfx
             }
 
             record_command_buffer(this->command_buffer, image_index.value);
+
+            vk::Semaphore wait_semaphores[] = { image_available_semaphore };
+            vk::Semaphore signal_semaphores[] = { render_finished_semaphore };
+
+            vk::PipelineStageFlags wait_stages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+
+            vk::SubmitInfo submit_info {
+                sizeof(wait_semaphores) / sizeof(vk::Semaphore),
+                wait_semaphores,
+                wait_stages,
+                1,
+                &command_buffer,
+                sizeof(signal_semaphores) / sizeof(vk::Semaphore),
+                signal_semaphores,
+            };
+
+            graphics_queue.submit(submit_info, in_flight_fence);
             device->resetFences(in_flight_fence);
+
+            vk::SwapchainKHR swap_chains[] = { swap_chain };
+            vk::PresentInfoKHR present_info {
+                sizeof(wait_semaphores) / sizeof(vk::Semaphore),
+                signal_semaphores,
+                sizeof(swap_chains) / sizeof(vk::SwapchainKHR),
+                swap_chains,
+            };
+
+            vk::Result result = present_queue.presentKHR(present_info);
+
+            if (result != vk::Result::eSuccess)
+            {
+                throw std::runtime_error("unable to present info!");
+            }
         }
 
     private:

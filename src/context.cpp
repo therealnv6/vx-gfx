@@ -168,6 +168,9 @@ namespace gfx
         }
 
         this->create_swap_chain();
+        this->create_sync_objects();
+        this->create_command_pool();
+        this->create_command_buffer();
     }
 
     void context::create_surface()
