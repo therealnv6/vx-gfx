@@ -2,6 +2,8 @@
 #include <framework.h>
 #include <pipeline.h>
 #include <renderpass.h>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 int main()
 {
@@ -35,11 +37,11 @@ int main()
                 && required_extensions.empty();
         };
 
-        gfx::framework framework(context->window);
+        gfx::framework framework(context);
         gfx::pipeline pipeline { context, "triangle.vert.spv",
             "triangle.frag.spv" };
 
-        framework.run();
+        framework.run(pipeline);
     }
     catch (const std::exception &e)
     {
