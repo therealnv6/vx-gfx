@@ -11,6 +11,7 @@
 #include <vulkan/vulkan.hpp> // modern c++!
 
 #include <limits>
+#include <memory>
 #include <optional>
 #include <ranges>
 #include <set>
@@ -133,8 +134,6 @@ namespace gfx
         };
 
         context(uint32_t width, uint32_t height, const char *name);
-        context(const context &) = delete;
-
         ~context();
 
         static context &current()

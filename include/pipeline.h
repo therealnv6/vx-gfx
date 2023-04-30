@@ -3,6 +3,7 @@
 #include <context.h>
 #include <string>
 #include <vector>
+#include <renderpass.h>
 
 namespace gfx
 {
@@ -16,12 +17,16 @@ namespace gfx
     class pipeline
     {
     public:
-        vk::PipelineLayout pipeline_layout;
+        vk::Pipeline graphics_pipeline; 
+        gfx::render_pass render_pass;
+        std::shared_ptr<gfx::context> context;
+        
+        pipeline(std::shared_ptr<gfx::context> context, const std::string &vertex_file_path, const std::string &fragment_file_path);
+        ~pipeline();
 
-        pipeline(gfx::context &context, const std::string &vertex_file_path, const std::string &fragment_file_path);
         vk::ShaderModule create_shader_module(gfx::context &context, std::vector<unsigned int>);
 
     private:
-        void create_graphics_pipeline(gfx::context &context, const std::string &vertex_file_path, const std::string &fragment_file_path);
+        void create_graphics_pipeline(std::shared_ptr<gfx::context> context, const std::string &vertex_file_path, const std::string &fragment_file_path);
     };
 }

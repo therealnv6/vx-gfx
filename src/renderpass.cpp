@@ -3,15 +3,21 @@
 
 namespace gfx
 {
-    render_pass::render_pass(gfx::context &context)
+    render_pass::render_pass(std::shared_ptr<gfx::context> context)
+        : context { context }
     {
         this->create_render_pass(context);
     }
 
-    void render_pass::create_render_pass(gfx::context &context)
+    render_pass::~render_pass()
+    {
+        context->device->destroyRenderPass(this->pass);
+    }
+
+    void render_pass::create_render_pass(std::shared_ptr<gfx::context> context)
     {
         vk::AttachmentDescription color_attachment({},
-            context.swap_chain_image_format, // format
+            context->swap_chain_image_format, // format
             vk::SampleCountFlagBits::e1, // samples
             vk::AttachmentLoadOp::eClear, // loadOp
             vk::AttachmentStoreOp::eStore, // storeOp
@@ -30,7 +36,7 @@ namespace gfx
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &color_attachment_ref;
 
-        this->pass = context.device->createRenderPass(
+        this->pass = context->device->createRenderPass(
             vk::RenderPassCreateInfo({}, 1, &color_attachment, 1, &subpass));
     }
 }

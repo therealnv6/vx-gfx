@@ -10,14 +10,14 @@ int main()
 
     try
     {
-        gfx::context context(800, 600, "vx-gfx");
+        std::shared_ptr<gfx::context> context = std::make_shared<gfx::context>(800, 600, "vx-gfx");
 
-        context.choose_present_mode = [](const gfx::present_modes)
+        context->choose_present_mode = [](const gfx::present_modes)
         {
             return gfx::present_mode::eImmediate;
         };
 
-        context.device_suitable = [](vk::PhysicalDevice device)
+        context->device_suitable = [](vk::PhysicalDevice device)
         {
             vk::PhysicalDeviceProperties properties = device.getProperties<vk::DispatchLoaderStatic>();
             vk::PhysicalDeviceFeatures features = device.getFeatures<vk::DispatchLoaderStatic>();
@@ -35,9 +35,7 @@ int main()
                 && required_extensions.empty();
         };
 
-        gfx::framework framework(context.window);
-        gfx::render_pass renderpass { context };
-
+        gfx::framework framework(context->window);
         gfx::pipeline pipeline { context, "triangle.vert.spv",
             "triangle.frag.spv" };
 
@@ -45,6 +43,6 @@ int main()
     }
     catch (const std::exception &e)
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
 }
