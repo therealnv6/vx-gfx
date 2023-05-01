@@ -14,7 +14,7 @@ namespace gfx
         {
             glfwPollEvents();
 
-            context->draw([this, pipeline](vk::CommandBuffer buffer, uint32_t image_index)
+            context->draw([this, &pipeline](vk::CommandBuffer buffer, uint32_t image_index)
                 {
                     vk::ClearValue clear_value({ 0.0f, 0.0f, 0.0f, 1.0f });
                     vk::Rect2D scissor {
@@ -46,10 +46,7 @@ namespace gfx
                     {
                         throw std::runtime_error("failed to end command buffer!");
                     }
-                    std::cout << "end of record_command_buffer() lambda" << std::endl; //
                 });
-
-            std::cout << "finished context->draw()" << std::endl;
         }
     }
 }
