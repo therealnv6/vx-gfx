@@ -19,9 +19,13 @@ namespace gfx
 
     context::~context()
     {
-        device->destroySemaphore(this->image_available_semaphore);
-        device->destroySemaphore(this->render_finished_semaphore);
-        device->destroyFence(this->in_flight_fence);
+        for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            device->destroySemaphore(this->image_available_semaphores[i]);
+            device->destroySemaphore(this->render_finished_semaphores[i]);
+            device->destroyFence(this->in_flight_fences[i]);
+        }
+
         device->destroyCommandPool(this->command_pool);
 
         for (auto image_view : this->swap_chain_image_views)
@@ -303,13 +307,10 @@ namespace gfx
     void context::create_command_buffer()
     {
         vk::CommandBufferAllocateInfo allocate_info {
-            this->command_pool, vk::CommandBufferLevel::ePrimary, 1
+            this->command_pool, vk::CommandBufferLevel::ePrimary, MAX_FRAMES_IN_FLIGHT
         };
 
-        std::vector<vk::CommandBuffer> result = device->allocateCommandBuffers(allocate_info);
-        vk::CommandBuffer single = result[0];
-
-        this->command_buffer = single;
+        this->command_buffers = device->allocateCommandBuffers(allocate_info);
     }
 
     void context::create_sync_objects()
@@ -317,8 +318,11 @@ namespace gfx
         vk::SemaphoreCreateInfo semaphore_info;
         vk::FenceCreateInfo fence_info { vk::FenceCreateFlagBits::eSignaled };
 
-        this->image_available_semaphore = this->device->createSemaphore(semaphore_info);
-        this->render_finished_semaphore = this->device->createSemaphore(semaphore_info);
-        this->in_flight_fence = this->device->createFence(fence_info);
+        for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            this->image_available_semaphores.push_back(device->createSemaphore(semaphore_info));
+            this->render_finished_semaphores.push_back(device->createSemaphore(semaphore_info));
+            this->in_flight_fences.push_back(device->createFence(fence_info));
+        }
     }
 }
