@@ -14,7 +14,7 @@ namespace gfx
         {
             glfwPollEvents();
 
-            context->draw([this, &pipeline](vk::CommandBuffer buffer, uint32_t image_index)
+            context->draw([this, &pipeline](vk::CommandBuffer *buffer, uint32_t image_index)
                 {
                     vk::ClearValue clear_value({ 0.0f, 0.0f, 0.0f, 1.0f });
                     vk::Rect2D scissor {
@@ -34,18 +34,18 @@ namespace gfx
                         &clear_value,
                     };
 
-                    buffer.beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
-                    buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphics_pipeline);
-                    buffer.setViewport(0, viewport);
-                    buffer.setScissor(0, scissor);
-                    buffer.draw(3, 1, 0, 0);
+                    buffer->beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
+                    buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphics_pipeline);
+                    buffer->setViewport(0, viewport);
+                    buffer->setScissor(0, scissor);
+                    buffer->draw(6, 1, 0, 0);
 
-                    buffer.endRenderPass();
+                    buffer->endRenderPass();
 
-                    if (vkEndCommandBuffer(buffer) != VK_SUCCESS)
+                    if (vkEndCommandBuffer(*buffer) != VK_SUCCESS)
                     {
                         throw std::runtime_error("failed to end command buffer!");
-                    }
+                    } //
                 });
         }
     }

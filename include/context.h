@@ -42,6 +42,7 @@ inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMesse
 
 namespace gfx
 {
+    static const int MAX_FRAMES_IN_FLIGHT = 3;
     static const std::vector<const char *> device_extensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME,
@@ -104,12 +105,12 @@ namespace gfx
         vk::DebugUtilsMessengerEXT debug_messenger;
 
         vk::CommandPool command_pool;
-        vk::CommandBuffer command_buffer;
+        std::vector<vk::CommandBuffer> command_buffers;
 
-        vk::Semaphore image_available_semaphore;
-        vk::Semaphore render_finished_semaphore;
+        std::vector<vk::Semaphore> image_available_semaphores;
+        std::vector<vk::Semaphore> render_finished_semaphores;
 
-        vk::Fence in_flight_fence;
+        std::vector<vk::Fence> in_flight_fences;
 
         std::vector<vk::Image> swap_chain_images;
         std::vector<vk::ImageView> swap_chain_image_views;
@@ -122,6 +123,7 @@ namespace gfx
         std::optional<vk::PhysicalDevice> physical_device;
 
         GLFWwindow *window;
+        uint32_t current_frame = 0;
 
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
         {
@@ -227,26 +229,26 @@ namespace gfx
         }
 
         void draw(
-            std::function<void(vk::CommandBuffer, uint32_t)> record_command_buffer,
+            std::function<void(vk::CommandBuffer*, uint32_t)> record_command_buffer,
             std::function<vk::CommandBufferBeginInfo(gfx::context &context)> begin = [](gfx::context &context)
             { return vk::CommandBufferBeginInfo {}; })
         {
-            if (device->waitForFences(in_flight_fence, true, UINT64_MAX) != vk::Result::eSuccess)
+            if (device->waitForFences(in_flight_fences[current_frame], true, UINT64_MAX) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("unable to wait for fence in_flight_fence!");
             }
 
-            device->resetFences(in_flight_fence);
+            device->resetFences(in_flight_fences[current_frame]);
 
-            vk::ResultValue<uint32_t> image_index = device->acquireNextImageKHR(swap_chain, UINT64_MAX, image_available_semaphore);
+            vk::ResultValue<uint32_t> image_index = device->acquireNextImageKHR(swap_chain, UINT64_MAX, image_available_semaphores[current_frame]);
 
-            command_buffer.reset(); // reset command buffer
-            command_buffer.begin(begin(*this));
+            command_buffers[current_frame].reset(); // reset command buffer
+            command_buffers[current_frame].begin(begin(*this));
 
-            record_command_buffer(this->command_buffer, image_index.value);
+            record_command_buffer(&this->command_buffers[current_frame], image_index.value);
 
-            vk::Semaphore wait_semaphores[] = { image_available_semaphore };
-            vk::Semaphore signal_semaphores[] = { render_finished_semaphore };
+            vk::Semaphore wait_semaphores[] = { image_available_semaphores[current_frame] };
+            vk::Semaphore signal_semaphores[] = { render_finished_semaphores[current_frame] };
 
             vk::PipelineStageFlags wait_stages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
@@ -255,12 +257,12 @@ namespace gfx
                 wait_semaphores,
                 wait_stages,
                 1,
-                &command_buffer,
+                &command_buffers[current_frame],
                 sizeof(signal_semaphores) / sizeof(vk::Semaphore),
                 signal_semaphores,
             };
 
-            graphics_queue.submit(submit_info, in_flight_fence);
+            graphics_queue.submit(submit_info, in_flight_fences[current_frame]);
 
             vk::SwapchainKHR swap_chains[] = { swap_chain };
             vk::PresentInfoKHR present_info {
@@ -275,6 +277,8 @@ namespace gfx
             {
                 throw std::runtime_error("unable to present info!");
             }
+
+            current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
         }
 
     private:
