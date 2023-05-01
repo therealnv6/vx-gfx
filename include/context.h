@@ -275,8 +275,6 @@ namespace gfx
             {
                 throw std::runtime_error("unable to present info!");
             }
-
-            std::cout << "end of draw!" << std::endl;
         }
 
     private:
