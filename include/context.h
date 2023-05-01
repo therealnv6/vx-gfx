@@ -268,6 +268,7 @@ namespace gfx
                 signal_semaphores,
                 sizeof(swap_chains) / sizeof(vk::SwapchainKHR),
                 swap_chains,
+                &image_index.value
             };
 
             vk::Result result = present_queue.presentKHR(present_info);

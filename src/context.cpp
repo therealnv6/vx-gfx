@@ -319,6 +319,6 @@ namespace gfx
 
         this->image_available_semaphore = this->device->createSemaphore(semaphore_info);
         this->render_finished_semaphore = this->device->createSemaphore(semaphore_info);
-        this->in_flight_fence = this->device->createFence(vk::FenceCreateInfo {});
+        this->in_flight_fence = this->device->createFence(fence_info);
     }
 }
