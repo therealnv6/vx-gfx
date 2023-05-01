@@ -50,7 +50,7 @@ namespace gfx
     };
 
     static const std::vector<const char *> validation_layers = {
-        "VK_LAYER_KHRONOS_validation"
+        "VK_LAYER_KHRONOS_validation",
     };
 
     typedef vk::PresentModeKHR present_mode;
@@ -271,12 +271,12 @@ namespace gfx
                 &image_index.value
             };
 
-            vk::Result result = present_queue.presentKHR(present_info);
-
-            if (result != vk::Result::eSuccess)
+            if (present_queue.presentKHR(present_info) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("unable to present info!");
             }
+
+            std::cout << "end of draw!" << std::endl;
         }
 
     private:
