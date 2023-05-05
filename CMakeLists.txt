@@ -10,6 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(Vulkan REQUIRED)
+find_package(spdlog REQUIRED)
 
 add_subdirectory(thirdparty/glfw)
 
@@ -30,6 +31,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     glfw 
+    spdlog::spdlog
     Vulkan::Vulkan
 )
 

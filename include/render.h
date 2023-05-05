@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <global.h>
+#include <device.h>
 #include <stdexcept>
 
 namespace gfx
@@ -17,7 +18,7 @@ namespace gfx
         void draw(command_buffer_record_type record, begin_type begin_command);
 
     private:
-        context *context;
+        gfx::device *device;
 
         command_buffer_record_type record = [](vk::CommandBuffer *buffer, uint32_t image_index)
         {

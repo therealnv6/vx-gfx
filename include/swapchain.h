@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include <device.h>
 #include <global.h>
 #include <vulkan/vulkan.hpp>
 
@@ -44,10 +45,10 @@ namespace gfx
             return available_formats[0];
         };
 
-        swapchain(context *context)
-            : context { context } {};
+        swapchain(gfx::device *device)
+            : device { device } {};
 
     private:
-        context *context;
+        gfx::device *device;
     };
 }

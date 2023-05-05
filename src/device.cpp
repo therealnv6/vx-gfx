@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <validation.h>
 #include <device.h>
 #include <global.h>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan_enums.hpp>
@@ -19,7 +21,7 @@ namespace gfx
 
         auto suitable_device = find_most_suitable(devices, surface);
 
-        if (suitable_device.has_value())
+        if (!suitable_device.has_value())
         {
             throw std::runtime_error("unable to find suitable device!");
         }
@@ -30,17 +32,13 @@ namespace gfx
         vk::DeviceQueueCreateInfo queue_create_info({}, indices.graphics_family.value(), 1, &this->queue_priority);
         vk::PhysicalDeviceFeatures device_features;
 
-        if (!validation_layers.empty())
-        {
-            std::cout << "[info] validation_layers are enabled!" << std::endl;
-        }
-
         vk::DeviceCreateInfo device_create_info({},
             static_cast<uint32_t>(1), &queue_create_info,
-            // we'll simply just make sure the validation_layers vector is empty in cases where validation layers are disabled.
-            validation_layers.size(), validation_layers.data(),
+            0, nullptr, // validation layers, these will be filled later!
             device_extensions.size(), device_extensions.data(),
             &device_features);
+
+        validation::fill_create_info(&device_create_info);
 
         this->logical_device = physical_device.createDevice(device_create_info);
         this->graphics_queue = this->logical_device.getQueue(indices.graphics_family.value(), 0);

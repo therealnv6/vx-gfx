@@ -15,8 +15,12 @@
 namespace gfx
 {
     // Forward declarations for render_pass and pipeline classes.
-    class render_pass; // renderpass.h
-    class pipeline; // pipeline.h
+    class render_pass
+    {
+    }; // renderpass.h
+    class pipeline
+    {
+    }; // pipeline.h
 
     /**
      * [context] class will handle most Vulkan-specific actions.
@@ -33,14 +37,19 @@ namespace gfx
     class context
     {
     public:
+        context();
+        ~context()
+        {
+            this->cleanup();
+        };
         // Initializes the swapchain for this context.
         void init_swap_chain(swapchain swapchain);
 
-    protected:
         // Vulkan instance and surface.
         vk::Instance instance;
         vk::SurfaceKHR surface;
 
+    protected:
         // Command pool and buffers.
         vk::CommandPool pool;
         std::vector<vk::CommandBuffer> command_buffers;
@@ -64,8 +73,11 @@ namespace gfx
         };
 
     private:
+        const uint32_t WIDTH = 800;
+        const uint32_t HEIGHT = 600;
+
         // Pointer to device and swapchain objects.
-        gfx::device *device;
+        gfx::device *device = nullptr;
         gfx::swapchain swapchain = nullptr;
 
         // Map of render passes and associated pipelines.
@@ -73,6 +85,11 @@ namespace gfx
 
         // Function for checking if validation support is available.
         bool has_validation_support();
+        void create_window();
+        void create_instance();
+        void create_surface();
+
+        void cleanup();
 
         // Friend classes for accessing private members.
         friend class swapchain;

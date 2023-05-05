@@ -8,13 +8,7 @@ A minimal voxel game (engine) written in C++ with Vulkan. Currently still follow
 - [ ] Convert to [glfw.hpp](https://github.com/gnzlbg/glfw/blob/master/include/glfw/glfw.hpp)
 - [ ] Support
   - [x] [Windows]()
-  - [x] Linux
-  - [ ] macOS (untested)
-  - [ ] Android
-  - [ ] iOS
-  - [ ] PS4, PS5
-  - [ ] Xbox One, Xbox series X
-  - [ ] Nintendo Switch
+  - [x] [Linux]()
 
 ### Not Planned
 - Several graphics backends.
@@ -28,6 +22,7 @@ A minimal voxel game (engine) written in C++ with Vulkan. Currently still follow
   * Tested with GCC and MSVC
 * [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)
 * [CMake](https://cmake.org/)
+* [spdlog](https://github.com/gabime/spdlog)
 
 ### Windows
 ```PS

@@ -13,10 +13,6 @@ namespace gfx
         VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
     };
 
-    static const std::vector<const char *> validation_layers = {
-        "VK_LAYER_KHRONOS_validation",
-    };
-
     class device
     {
     public:

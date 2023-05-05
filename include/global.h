@@ -1,6 +1,7 @@
 #pragma once
-#include <optional>
+#include "spdlog/spdlog.h"
 #include <iostream>
+#include <optional>
 #include <vulkan/vulkan.hpp>
 
 namespace gfx

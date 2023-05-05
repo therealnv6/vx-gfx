@@ -1,13 +1,26 @@
 #include "device.h"
+#include "spdlog/spdlog.h"
 #include <context.h>
 #include <render.h>
 #include <swapchain.h>
 
 int main()
 {
-    gfx::device device { nullptr, nullptr };
-    gfx::context context {};
-    gfx::swapchain swapchain { &context };
+    try
+    {
+        gfx::context context {};
+        gfx::device device { &context.instance, &context.surface };
+        gfx::swapchain swapchain { &device };
 
-    context.init_swap_chain(swapchain);
+        context.init_swap_chain(swapchain);
+
+        while (true)
+        {
+            
+        }
+    }
+    catch (std::exception &e)
+    {
+        spdlog::error("unable to instantiate vuxol, {}", e.what());
+    }
 }
