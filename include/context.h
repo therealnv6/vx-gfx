@@ -63,14 +63,6 @@ namespace gfx
             return gfx::present_mode::eImmediate;
         };
 
-        // Function for checking if a physical device is suitable for use.
-        // This function takes a physical device as input and returns a boolean value.
-        std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
-        {
-            // Default is that all devices are suitable for use.
-            return true;
-        };
-
     private:
         // Pointer to device and swapchain objects.
         gfx::device *device;

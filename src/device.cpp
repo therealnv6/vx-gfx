@@ -65,6 +65,11 @@ namespace gfx
 
         for (const auto &device : devices)
         {
+            if (!this->device_suitable(device))
+            {
+                continue;
+            }
+
             // Evaluate device properties to determine its score
             gfx::queue_family_indices indices = this->find_queue_families(std::optional(device), surface, vk::QueueFlagBits::eGraphics);
             int score = evaluate_device(device, indices);
