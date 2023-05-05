@@ -2,6 +2,7 @@
 #include <functional>
 #include <global.h>
 #include <optional>
+#include <vulkan/vulkan_enums.hpp>
 
 namespace gfx
 {
@@ -25,6 +26,8 @@ namespace gfx
         vk::Queue graphics_queue;
         vk::Queue present_queue;
 
+        const vk::QueueFlags queue_flags = vk::QueueFlagBits::eGraphics;
+
         // Function for checking if a physical device is suitable for use.
         // This function takes a physical device as input and returns a boolean value.
         std::function<bool(vk::PhysicalDevice)> device_suitable = [](vk::PhysicalDevice device)
@@ -33,7 +36,7 @@ namespace gfx
             return true;
         };
 
-        device(vk::Instance *instance, vk::SurfaceKHR *surface);
+        device(const vk::Instance *instance, const vk::SurfaceKHR *surface);
         ~device();
 
         device(const device &) = delete;
@@ -43,13 +46,13 @@ namespace gfx
         float queue_priority = 1.0f;
 
         std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> find_most_suitable(
-            std::vector<vk::PhysicalDevice> device,
-            vk::SurfaceKHR *surface);
+            const std::vector<vk::PhysicalDevice> device,
+            const vk::SurfaceKHR *surface);
 
         gfx::queue_family_indices find_queue_families(
-            std::optional<vk::PhysicalDevice> device,
-            vk::SurfaceKHR *surface,
-            const vk::QueueFlagBits flag_bits);
+            const std::optional<vk::PhysicalDevice> device,
+            const vk::SurfaceKHR *surface,
+            const vk::QueueFlags flag_bits);
 
         uint32_t evaluate_device(vk::PhysicalDevice physical_device, gfx::queue_family_indices indices);
 

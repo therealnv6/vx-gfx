@@ -3,10 +3,11 @@
 #include <global.h>
 #include <stdexcept>
 #include <vector>
+#include <vulkan/vulkan_enums.hpp>
 
 namespace gfx
 {
-    device::device(vk::Instance *instance, vk::SurfaceKHR *surface)
+    device::device(const vk::Instance *instance, const vk::SurfaceKHR *surface)
     {
         assert(instance != nullptr);
         assert(surface != nullptr);
@@ -55,7 +56,9 @@ namespace gfx
         logical_device.destroy();
     }
 
-    std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> device::find_most_suitable(std::vector<vk::PhysicalDevice> devices, vk::SurfaceKHR *surface)
+    std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> device::find_most_suitable(
+        const std::vector<vk::PhysicalDevice> devices,
+        const vk::SurfaceKHR *surface)
     {
         // Evaluate each device and store the best one
         vk::PhysicalDevice best_device;
@@ -71,7 +74,7 @@ namespace gfx
             }
 
             // Evaluate device properties to determine its score
-            gfx::queue_family_indices indices = this->find_queue_families(std::optional(device), surface, vk::QueueFlagBits::eGraphics);
+            gfx::queue_family_indices indices = this->find_queue_families(std::optional(device), surface, this->queue_flags);
             int score = evaluate_device(device, indices);
 
             // If the score is higher than the previous best, update the best device and score
@@ -94,7 +97,10 @@ namespace gfx
         }
     }
 
-    gfx::queue_family_indices device::find_queue_families(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR *surface, const vk::QueueFlagBits flag_bits)
+    gfx::queue_family_indices device::find_queue_families(
+        const std::optional<vk::PhysicalDevice> device,
+        const vk::SurfaceKHR *surface,
+        const vk::QueueFlags flag_bits)
     {
         std::vector<vk::QueueFamilyProperties> queue_family_properties = device->getQueueFamilyProperties();
         gfx::queue_family_indices indices;
