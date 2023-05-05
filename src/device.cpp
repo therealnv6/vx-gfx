@@ -8,6 +8,9 @@ namespace gfx
 {
     device::device(vk::Instance *instance, vk::SurfaceKHR *surface)
     {
+        assert(instance != nullptr);
+        assert(surface != nullptr);
+
         std::vector<vk::PhysicalDevice> devices = instance->enumeratePhysicalDevices();
 
         vk::PhysicalDevice physical_device;
@@ -39,6 +42,17 @@ namespace gfx
             &device_features);
 
         this->logical_device = physical_device.createDevice(device_create_info);
+        this->graphics_queue = this->logical_device.getQueue(indices.graphics_family.value(), 0);
+    }
+
+    device::~device()
+    {
+        this->cleanup();
+    }
+
+    void device::cleanup()
+    {
+        logical_device.destroy();
     }
 
     std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> device::find_most_suitable(std::vector<vk::PhysicalDevice> devices, vk::SurfaceKHR *surface)

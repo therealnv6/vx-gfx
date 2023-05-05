@@ -22,7 +22,11 @@ namespace gfx
         vk::Device logical_device;
         vk::PhysicalDevice physical_device;
 
+        vk::Queue graphics_queue;
+        vk::Queue present_queue;
+
         device(vk::Instance *instance, vk::SurfaceKHR *surface);
+        ~device();
 
         device(const device &) = delete;
         device operator=(const device &) = delete;
@@ -30,8 +34,17 @@ namespace gfx
     private:
         float queue_priority = 1.0f;
 
-        std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> find_most_suitable(std::vector<vk::PhysicalDevice> device, vk::SurfaceKHR *surface);
-        gfx::queue_family_indices find_queue_families(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR *surface, const vk::QueueFlagBits flag_bits);
+        std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> find_most_suitable(
+            std::vector<vk::PhysicalDevice> device,
+            vk::SurfaceKHR *surface);
+
+        gfx::queue_family_indices find_queue_families(
+            std::optional<vk::PhysicalDevice> device,
+            vk::SurfaceKHR *surface,
+            const vk::QueueFlagBits flag_bits);
+
         uint32_t evaluate_device(vk::PhysicalDevice physical_device, gfx::queue_family_indices indices);
+
+        void cleanup();
     };
 }
