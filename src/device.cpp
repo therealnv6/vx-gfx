@@ -1,11 +1,14 @@
 #include <algorithm>
-#include <validation.h>
 #include <device.h>
 #include <global.h>
+#include <optional>
+#include <set>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+#include <validation.h>
 #include <vector>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace gfx
 {
@@ -39,7 +42,8 @@ namespace gfx
             &device_features);
 
         this->logical_device = physical_device.createDevice(device_create_info);
-        this->graphics_queue = this->logical_device.getQueue(indices.graphics_family.value(), 0);
+        this->graphics_queue = logical_device.getQueue(indices.graphics_family.value(), 0);
+        this->present_queue = logical_device.getQueue(indices.present_family.value(), 0);
     }
 
     device::~device()
@@ -70,7 +74,7 @@ namespace gfx
             }
 
             // Evaluate device properties to determine its score
-            gfx::queue_family_indices indices = this->find_queue_families(std::optional(device), surface, this->queue_flags);
+            gfx::queue_family_indices indices = this->find_queue_families(surface, device);
             int score = evaluate_device(device, indices);
 
             // If the score is higher than the previous best, update the best device and score
@@ -93,11 +97,13 @@ namespace gfx
         }
     }
 
-    gfx::queue_family_indices device::find_queue_families(
-        const std::optional<vk::PhysicalDevice> device,
-        const vk::SurfaceKHR *surface,
-        const vk::QueueFlags flag_bits)
+    gfx::queue_family_indices device::find_queue_families(const vk::SurfaceKHR *surface, std::optional<vk::PhysicalDevice> device)
     {
+        if (device == std::nullopt)
+        {
+            throw std::runtime_error("device provided in find_queue_families() was std::nullopt");
+        }
+
         std::vector<vk::QueueFamilyProperties> queue_family_properties = device->getQueueFamilyProperties();
         gfx::queue_family_indices indices;
 
@@ -110,7 +116,7 @@ namespace gfx
                 break;
             }
 
-            if (queue_family.queueFlags & flag_bits)
+            if (queue_family.queueFlags & queue_flags)
             {
                 indices.graphics_family = i;
 
@@ -126,6 +132,27 @@ namespace gfx
 
     uint32_t device::evaluate_device(vk::PhysicalDevice physical_device, gfx::queue_family_indices indices)
     {
-        return indices.is_complete() ? 1000 : 0;
+        int evaluation = 0;
+        bool extensions_supported = false;
+
+        std::vector<vk::ExtensionProperties> available_extensions = physical_device.enumerateDeviceExtensionProperties();
+        std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
+
+        for (const auto &extension : available_extensions)
+        {
+            required_extensions.erase(extension.extensionName);
+        }
+
+        if (!required_extensions.empty())
+        {
+            return 0;
+        }
+
+        if (!indices.is_complete())
+        {
+            return 0;
+        }
+
+        return evaluation++;
     }
 }

@@ -38,17 +38,14 @@ namespace gfx
         device(const device &) = delete;
         device operator=(const device &) = delete;
 
+        gfx::queue_family_indices find_queue_families(const vk::SurfaceKHR *surface, std::optional<vk::PhysicalDevice> device);
+
     private:
         float queue_priority = 1.0f;
 
         std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> find_most_suitable(
             const std::vector<vk::PhysicalDevice> device,
             const vk::SurfaceKHR *surface);
-
-        gfx::queue_family_indices find_queue_families(
-            const std::optional<vk::PhysicalDevice> device,
-            const vk::SurfaceKHR *surface,
-            const vk::QueueFlags flag_bits);
 
         uint32_t evaluate_device(vk::PhysicalDevice physical_device, gfx::queue_family_indices indices);
 

@@ -64,15 +64,6 @@ namespace gfx
         // GLFW window.
         GLFWwindow *window;
 
-        // Function for choosing a present mode.
-        // This function takes a vector of available present modes as input
-        // and returns a chosen present mode.
-        std::function<gfx::present_mode(const gfx::present_modes &available_present_modes)> choose_present_mode = [](const gfx::present_modes &available_present_modes)
-        {
-            // Default present mode if no other is chosen.
-            return gfx::present_mode::eImmediate;
-        };
-
     private:
         const uint32_t WIDTH = 800;
         const uint32_t HEIGHT = 600;
@@ -92,7 +83,7 @@ namespace gfx
 
         void cleanup();
 
-                std::vector<const char *> get_required_extensions();
+        std::vector<const char *> get_required_extensions();
 
         // Friend classes for accessing private members.
         friend class swapchain;

@@ -1,3 +1,4 @@
+#include "swapchain.h"
 #include "validation.h"
 #include <context.h>
 #include <vulkan/vulkan_core.h>
@@ -29,6 +30,9 @@ namespace gfx
     // Initializes the swap chain for the context.
     void context::init_swap_chain(gfx::swapchain swapchain)
     {
+        spdlog::info("initializing swapchain of gfx::context");
+
+        swapchain.initialize(window, surface);
         this->swapchain = swapchain;
     }
 
