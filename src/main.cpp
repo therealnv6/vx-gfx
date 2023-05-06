@@ -13,11 +13,6 @@ int main()
         gfx::swapchain swapchain { &device };
 
         context.init_swap_chain(swapchain);
-
-        while (true)
-        {
-            
-        }
     }
     catch (std::exception &e)
     {

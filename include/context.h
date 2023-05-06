@@ -52,6 +52,7 @@ namespace gfx
     protected:
         // Command pool and buffers.
         vk::CommandPool pool;
+        vk::DebugUtilsMessengerEXT debugger;
         std::vector<vk::CommandBuffer> command_buffers;
 
         // Semaphores and fences for synchronization.
@@ -90,6 +91,8 @@ namespace gfx
         void create_surface();
 
         void cleanup();
+
+                std::vector<const char *> get_required_extensions();
 
         // Friend classes for accessing private members.
         friend class swapchain;

@@ -1,3 +1,4 @@
+#include "validation.h"
 #include <context.h>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_handles.hpp>
@@ -53,23 +54,26 @@ namespace gfx
     {
         spdlog::info("creating vulkan window");
 
-        uint32_t glfw_extension_count = 0;
-        const char **glfw_extensions;
-
-        glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
-
         vk::ApplicationInfo app_info("vuxol", // application name
             VK_MAKE_VERSION(1, 0, 0), // application version
             "furry engine", // engine name
             VK_MAKE_VERSION(1, 0, 0), // engine version
             VK_API_VERSION_1_0); // Vulkan API version
 
+        std::vector<const char *> extensions = get_required_extensions();
+
         vk::InstanceCreateInfo instance_info({},
             &app_info, // pointer to application info
             0, nullptr, // no validation layers
-            glfw_extension_count, glfw_extensions); // GLFW extensions
+            extensions.size(), extensions.data()); // GLFW extensions
 
         this->instance = vk::createInstance(instance_info); // create the Vulkan instance
+
+        if (validation::enable_validation_layers())
+        {
+            spdlog::info("setting up this->debugger in gfx::context");
+            this->debugger = validation::create_debug_messenger(&instance);
+        }
     }
 
     void context::create_surface()
@@ -82,5 +86,20 @@ namespace gfx
         }
 
         this->surface = surface;
+    }
+
+    std::vector<const char *> context::get_required_extensions()
+    {
+        uint32_t glfw_extension_count = 0;
+        const char **glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+
+        std::vector<const char *> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
+
+        if (validation::enable_validation_layers())
+        {
+            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        }
+
+        return extensions;
     }
 }
