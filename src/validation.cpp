@@ -10,9 +10,9 @@ namespace validation
     typedef vk::DebugUtilsMessageSeverityFlagBitsEXT severity_flags;
     typedef vk::DebugUtilsMessageTypeFlagBitsEXT message_type_flag;
 
-    inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
+   inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
     {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+        auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
         if (func != nullptr)
         {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
@@ -23,9 +23,9 @@ namespace validation
         }
     }
 
-    inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
+    inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
     {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+        auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
         if (func != nullptr)
         {
             func(instance, debugMessenger, pAllocator);
@@ -54,18 +54,6 @@ namespace validation
         }
 
         return VK_FALSE;
-    }
-
-    void fill_create_info(vk::DeviceCreateInfo *info)
-    {
-        if (enable_validation_layers() && !check_validation_layer_support())
-        {
-            throw std::runtime_error("validation layers requested, but not available");
-        }
-
-        // [warning] validation layer: loader_create_device_chain: Using deprecated and ignored 'ppEnabledLayerNames' member of 'VkDeviceCreateInfo' when creating a Vulkan device.
-        info->enabledLayerCount = static_cast<uint32_t>(ENABLED_LAYERS.size());
-        info->ppEnabledLayerNames = ENABLED_LAYERS.data();
     }
 
     vk::DebugUtilsMessengerEXT create_debug_messenger(vk::Instance *instance)

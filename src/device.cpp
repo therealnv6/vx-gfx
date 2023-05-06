@@ -38,8 +38,6 @@ namespace gfx
             device_extensions.size(), device_extensions.data(),
             &device_features);
 
-        validation::fill_create_info(&device_create_info);
-
         this->logical_device = physical_device.createDevice(device_create_info);
         this->graphics_queue = this->logical_device.getQueue(indices.graphics_family.value(), 0);
     }
