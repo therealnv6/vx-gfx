@@ -72,9 +72,12 @@ namespace gfx
 
         // Initializes the swapchain object.
         void initialize(GLFWwindow *window, vk::SurfaceKHR &surface);
+        void cleanup();
 
         // Creates the swapchain object.
         void create_swapchain(vk::SurfaceKHR &surface, gfx::swapchain_support_details details);
+
+        void create_image_views();
 
         // Chooses the swap extent based on the surface's capabilities and the window's size.
         vk::Extent2D choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities, GLFWwindow *window);
@@ -82,6 +85,8 @@ namespace gfx
         // Constructor for the swapchain class.
         swapchain(gfx::device *device)
             : device { device } {};
+
+        ~swapchain();
 
     private:
         gfx::device *device; // The device associated with the swapchain.

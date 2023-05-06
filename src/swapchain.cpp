@@ -7,6 +7,21 @@
 
 namespace gfx
 {
+    swapchain::~swapchain()
+    {
+        this->cleanup();
+    }
+
+    void swapchain::cleanup()
+    {
+        for (auto image_view : image_views)
+        {
+            device->logical_device.destroyImageView(image_view);
+        }
+
+        device->logical_device.destroySwapchainKHR(chain);
+    }
+
     gfx::swapchain_support_details query_swapchain_support(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR surface)
     {
         return gfx::swapchain_support_details {
@@ -62,6 +77,39 @@ namespace gfx
 
         this->chain = device->logical_device.createSwapchainKHR(create_info);
         this->images = device->logical_device.getSwapchainImagesKHR(chain);
+    }
+
+    void swapchain::create_image_views()
+    {
+        this->image_views.resize(this->images.size());
+
+        for (auto i = 0; i < this->images.size(); i++)
+        {
+            vk::Image image = this->images[i];
+            vk::ImageViewType view_type = vk::ImageViewType::e2D;
+            vk::Format format = image_format;
+            vk::ComponentMapping compmonent_mapping = vk::ComponentMapping(
+                vk::ComponentSwizzle::eIdentity,
+                vk::ComponentSwizzle::eIdentity,
+                vk::ComponentSwizzle::eIdentity,
+                vk::ComponentSwizzle::eIdentity);
+
+            vk::ImageSubresourceRange subsource_range = vk::ImageSubresourceRange(
+                vk::ImageAspectFlagBits::eColor,
+                0,
+                1,
+                0,
+                1);
+
+            vk::ImageViewCreateInfo create_info({},
+                image,
+                view_type,
+                format,
+                compmonent_mapping,
+                subsource_range);
+
+            image_views[i] = device->logical_device.createImageView(create_info);
+        }
     }
 
     vk::Extent2D swapchain::choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities, GLFWwindow *window)
