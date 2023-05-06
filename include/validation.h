@@ -10,7 +10,6 @@ namespace validation
 // #endif
     };
 
-    void fill_create_info(vk::DeviceCreateInfo *info);
     vk::DebugUtilsMessengerEXT create_debug_messenger(vk::Instance *instance);
 
     const bool enable_validation_layers();
