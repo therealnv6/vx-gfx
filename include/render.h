@@ -1,8 +1,8 @@
 #pragma once
 
+#include <device.h>
 #include <functional>
 #include <global.h>
-#include <device.h>
 #include <stdexcept>
 
 namespace gfx
