@@ -14,14 +14,6 @@
 
 namespace gfx
 {
-    // Forward declarations for render_pass and pipeline classes.
-    class render_pass
-    {
-    }; // renderpass.h
-    class pipeline
-    {
-    }; // pipeline.h
-
     /**
      * [context] class will handle most Vulkan-specific actions.
      * It manages device, surface, synchronization, and swapchain creation.
@@ -71,9 +63,6 @@ namespace gfx
         // Pointer to device and swapchain objects.
         gfx::device *device = nullptr;
         gfx::swapchain swapchain = nullptr;
-
-        // Map of render passes and associated pipelines.
-        std::map<render_pass, std::vector<pipeline>> passes;
 
         // Function for checking if validation support is available.
         bool has_validation_support();

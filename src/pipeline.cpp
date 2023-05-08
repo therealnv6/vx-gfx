@@ -27,22 +27,15 @@ namespace gfx
         return buffer;
     }
 
-    pipeline::pipeline(gfx::device *device, const std::string &vert_shader_name, const std::string &frag_shader_name)
-        : device { device }
+    pipeline::pipeline(gfx::swapchain *swapchain, const std::string &vert_shader_name, const std::string &frag_shader_name)
+        : swapchain { swapchain }
+        , device { swapchain->device }
     {
-        this->create_render_pass();
-        this->create_frame_buffers();
         this->create_graphics_pipeline(vert_shader_name, frag_shader_name);
     }
 
     void pipeline::cleanup()
     {
-        for (auto framebuffer : framebuffers)
-        {
-            device->logical_device.destroyFramebuffer(framebuffer);
-        }
-
-        device->logical_device.destroyRenderPass(pass);
         device->logical_device.destroyPipeline(vk_pipeline);
     }
 
@@ -158,7 +151,7 @@ namespace gfx
         };
 
         pipelineInfo.subpass = 0;
-        pipelineInfo.renderPass = pass;
+        pipelineInfo.renderPass = pass->pass;
         pipelineInfo.basePipelineHandle = nullptr;
         pipelineInfo.basePipelineIndex = -1;
 
@@ -176,66 +169,5 @@ namespace gfx
 
         device->logical_device.destroyShaderModule(vertex_shader);
         device->logical_device.destroyShaderModule(fragment_shader);
-    }
-
-    void pipeline::create_render_pass()
-    {
-        vk::AttachmentDescription color_attachment({},
-            swapchain->image_format, // format
-            vk::SampleCountFlagBits::e1, // samples
-            vk::AttachmentLoadOp::eClear, // loadOp
-            vk::AttachmentStoreOp::eStore, // storeOp
-            vk::AttachmentLoadOp::eDontCare, // stencilLoadOp
-            vk::AttachmentStoreOp::eDontCare, // stencilStoreOp
-            vk::ImageLayout::eUndefined, // initialLayout
-            vk::ImageLayout::ePresentSrcKHR // finalLayout
-        );
-
-        vk::AttachmentReference color_attachment_ref(0, vk::ImageLayout::eColorAttachmentOptimal);
-
-        vk::SubpassDescription subpass({},
-            vk::PipelineBindPoint::eGraphics, // pipelineBindPoint
-            color_attachment_ref // pColorAttachments
-        );
-
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &color_attachment_ref;
-
-        vk::SubpassDependency dependency {
-            VK_SUBPASS_EXTERNAL,
-            0,
-            vk::PipelineStageFlagBits::eColorAttachmentOutput,
-            vk::PipelineStageFlagBits::eColorAttachmentOutput,
-            vk::AccessFlagBits::eNone,
-            vk::AccessFlagBits::eColorAttachmentWrite,
-        };
-
-        vk::RenderPassCreateInfo info({}, 1, &color_attachment, 1, &subpass, 1, &dependency);
-
-        this->pass = device->logical_device.createRenderPass(info);
-    }
-
-    void pipeline::create_frame_buffers()
-    {
-        framebuffers.resize(swapchain->images.size());
-
-        for (auto i = 0; i < swapchain->image_views.size(); i++)
-        {
-            vk::ImageView attachments[] = {
-                swapchain->image_views[i]
-            };
-
-            vk::FramebufferCreateInfo create_info {
-                {},
-                this->pass,
-                sizeof(attachments) / sizeof(vk::ImageView),
-                attachments,
-                swapchain->extent.width,
-                swapchain->extent.height,
-                1
-            };
-
-            this->framebuffers[i] = device->logical_device.createFramebuffer(create_info);
-        }
     }
 }

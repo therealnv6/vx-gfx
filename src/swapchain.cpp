@@ -135,4 +135,98 @@ namespace gfx
             return actualExtent;
         }
     }
+
+    render_pass::render_pass(gfx::swapchain *swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
+        : swapchain(swapchain),
+        device {swapchain->device}
+    {
+        // Set render pass options
+        this->samples = samples;
+        this->store_operation = store_operation;
+        this->load_operation = load_operation;
+        this->stencil_load_op = stencil_load_op;
+        this->stencil_store_op = stencil_store_op;
+        this->initial_layout = initial_layout;
+        this->final_layout = final_layout;
+
+        // Create render pass and frame buffers
+        this->create_render_pass();
+        this->create_frame_buffers();
+    }
+
+    render_pass start_render_pass(gfx::swapchain *swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
+    {
+        return render_pass(swapchain, samples, store_operation, load_operation, stencil_load_op, stencil_store_op, initial_layout, final_layout);
+    }
+
+    void render_pass::cleanup()
+    {
+        for (auto framebuffer : framebuffers)
+        {
+            device->logical_device.destroyFramebuffer(framebuffer);
+        }
+
+        device->logical_device.destroyRenderPass(pass);
+    }
+
+    void render_pass::create_render_pass()
+    {
+        vk::AttachmentDescription color_attachment({},
+            swapchain->image_format, // format
+            vk::SampleCountFlagBits::e1, // samples
+            vk::AttachmentLoadOp::eClear, // loadOp
+            vk::AttachmentStoreOp::eStore, // storeOp
+            vk::AttachmentLoadOp::eDontCare, // stencilLoadOp
+            vk::AttachmentStoreOp::eDontCare, // stencilStoreOp
+            vk::ImageLayout::eUndefined, // initialLayout
+            vk::ImageLayout::ePresentSrcKHR // finalLayout
+        );
+
+        vk::AttachmentReference color_attachment_ref(0, vk::ImageLayout::eColorAttachmentOptimal);
+
+        vk::SubpassDescription subpass({},
+            vk::PipelineBindPoint::eGraphics, // pipelineBindPoint
+            color_attachment_ref // pColorAttachments
+        );
+
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &color_attachment_ref;
+
+        vk::SubpassDependency dependency {
+            VK_SUBPASS_EXTERNAL,
+            0,
+            vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            vk::AccessFlagBits::eNone,
+            vk::AccessFlagBits::eColorAttachmentWrite,
+        };
+
+        vk::RenderPassCreateInfo info({}, 1, &color_attachment, 1, &subpass, 1, &dependency);
+
+        this->pass = device->logical_device.createRenderPass(info);
+    }
+
+    void render_pass::create_frame_buffers()
+    {
+        framebuffers.resize(swapchain->images.size());
+
+        for (auto i = 0; i < swapchain->image_views.size(); i++)
+        {
+            vk::ImageView attachments[] = {
+                swapchain->image_views[i]
+            };
+
+            vk::FramebufferCreateInfo create_info {
+                {},
+                this->pass,
+                sizeof(attachments) / sizeof(vk::ImageView),
+                attachments,
+                swapchain->extent.width,
+                swapchain->extent.height,
+                1
+            };
+
+            this->framebuffers[i] = device->logical_device.createFramebuffer(create_info);
+        }
+    }
 }

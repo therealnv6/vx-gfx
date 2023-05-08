@@ -15,20 +15,15 @@ namespace gfx
     class pipeline
     {
     public:
-        vk::Pipeline vk_pipeline;   // The Vulkan pipeline handle.
-        vk::RenderPass pass;        // The Vulkan render pass handle.
+        vk::Pipeline vk_pipeline; // The Vulkan pipeline handle.
 
-        gfx::device *device;        // A pointer to the device object.
-        gfx::swapchain *swapchain;  // A pointer to the swapchain object.
-
-        std::vector<vk::Framebuffer> framebuffers;  // A vector of Vulkan framebuffer handles.
         std::vector<vk::DynamicState> dynamic_states = {
-            vk::DynamicState::eViewport,  // The dynamic viewport state.
-            vk::DynamicState::eScissor,   // The dynamic scissor state.
+            vk::DynamicState::eViewport, // The dynamic viewport state.
+            vk::DynamicState::eScissor, // The dynamic scissor state.
         };
 
         // The constructor for the pipeline class.
-        pipeline(gfx::device *device,
+        pipeline(gfx::swapchain *swapchain,
             const std::string &vert_shader_name,
             const std::string &frag_shader_name);
 
@@ -50,10 +45,9 @@ namespace gfx
             const std::string &vert_shader_name,
             const std::string &frag_shader_name);
 
-        // This function creates the Vulkan render pass for the pipeline.
-        void create_render_pass();
-
-        // This function creates the Vulkan framebuffers for the pipeline.
-        void create_frame_buffers();
+    private:
+        gfx::device *device; // A pointer to the device object.
+        gfx::render_pass *pass;
+        gfx::swapchain *swapchain; // A pointer to the swapchain object.
     };
 }
