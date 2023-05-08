@@ -14,12 +14,16 @@ namespace gfx
 
     void swapchain::cleanup()
     {
+        spdlog::info("cleaning up gfx::swapchain");
+
         for (auto image_view : image_views)
         {
             device->logical_device.destroyImageView(image_view);
         }
 
         device->logical_device.destroySwapchainKHR(chain);
+
+        spdlog::info("... done!");
     }
 
     gfx::swapchain_support_details query_swapchain_support(std::optional<vk::PhysicalDevice> device, vk::SurfaceKHR surface)
@@ -137,8 +141,8 @@ namespace gfx
     }
 
     render_pass::render_pass(gfx::swapchain *swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
-        : swapchain(swapchain),
-        device {swapchain->device}
+        : swapchain(swapchain)
+        , device { swapchain->device }
     {
         // Set render pass options
         this->samples = samples;

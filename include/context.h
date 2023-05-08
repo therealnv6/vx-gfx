@@ -35,7 +35,7 @@ namespace gfx
             this->cleanup();
         };
         // Initializes the swapchain for this context.
-        void init_swap_chain(swapchain swapchain);
+        void init_swap_chain(swapchain *swapchain);
 
         // Vulkan instance and surface.
         vk::Instance instance;
@@ -62,7 +62,7 @@ namespace gfx
 
         // Pointer to device and swapchain objects.
         gfx::device *device = nullptr;
-        gfx::swapchain swapchain = nullptr;
+        gfx::swapchain *swapchain = nullptr;
 
         // Function for checking if validation support is available.
         bool has_validation_support();

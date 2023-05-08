@@ -1,6 +1,7 @@
 #include "swapchain.h"
 #include "validation.h"
 #include <context.h>
+#include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -19,20 +20,24 @@ namespace gfx
     // Cleans up resources used by the context.
     void context::cleanup()
     {
+        spdlog::info("cleaning up gfx::context");
+
         // we have to destroy this stuff before we destroy the actual instance.
         instance.destroySurfaceKHR(surface);
         instance.destroy(); // destroy Vulkan instance
 
         glfwDestroyWindow(window); // destroy GLFW window
         glfwTerminate(); // clean up GLFW
+
+        spdlog::info("... done!");
     }
 
     // Initializes the swap chain for the context.
-    void context::init_swap_chain(gfx::swapchain swapchain)
+    void context::init_swap_chain(gfx::swapchain *swapchain)
     {
         spdlog::info("initializing swapchain of gfx::context");
 
-        swapchain.initialize(window, surface);
+        swapchain->initialize(window, surface);
         this->swapchain = swapchain;
     }
 

@@ -53,7 +53,9 @@ namespace gfx
 
     void device::cleanup()
     {
+        spdlog::info("cleaning up gfx::device");
         logical_device.destroy();
+        spdlog::info("... done!");
     }
 
     std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> device::find_most_suitable(

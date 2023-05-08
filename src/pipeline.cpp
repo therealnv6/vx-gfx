@@ -36,7 +36,9 @@ namespace gfx
 
     void pipeline::cleanup()
     {
+        spdlog::info("cleaning up gfx::pipeline");
         device->logical_device.destroyPipeline(vk_pipeline);
+        spdlog::info("... done!");
     }
 
     vk::ShaderModule pipeline::create_shader_module(const std::vector<char> &code)
