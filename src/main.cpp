@@ -4,6 +4,7 @@
 #include <context.h>
 #include <render.h>
 #include <swapchain.h>
+#include <util.h>
 
 int main()
 {
@@ -20,7 +21,7 @@ int main()
             "shadow", gfx::start_render_pass(&swapchain) // add a new render_pass to the swapchain by name "shadow"
         );
 
-        gfx::render_pass *render_pass = &swapchain.render_passes.at("shadow");
+        gfx::render_pass render_pass = swapchain.render_passes.at("shadow");
         gfx::commands commands { &swapchain, &context.surface };
 
         context.device = &device;
@@ -38,29 +39,22 @@ int main()
             drawer.begin();
             drawer.run([&](auto buffer, auto index)
                 {
-                    vk::ClearValue clear_value({ 0.0f, 0.0f, 0.0f, 1.0f });
-                    vk::Rect2D scissor {
-                        { 0, 0 },
-                        swapchain.extent
-                    };
+                    gfx::begin_render_pass(&render_pass,
+                        &swapchain,
+                        index,
+                        buffer,
+                        vk::Rect2D {
+                            { 0, 0 },
+                            swapchain.extent },
+                        gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
 
-                    vk::Viewport viewport {
-                        0.0f, 0.0f, static_cast<float>(swapchain.extent.width), static_cast<float>(swapchain.extent.height), 0.0f, 1.0f
-                    };
-
-                    vk::RenderPassBeginInfo render_pass_info {
-                        render_pass->pass,
-                        render_pass->framebuffers[index],
-                        scissor,
-                        1,
-                        &clear_value,
-                    };
-
-                    buffer->beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
                     buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
-                    buffer->setViewport(0, viewport);
-                    buffer->setScissor(0, scissor);
-                    buffer->draw(6, 1, 0, 0);
+                    buffer->draw(
+                        6, // 6 vertices
+                        1, // 1 instance
+                        0,
+                        0);
+
                     buffer->endRenderPass(); //
                 });
         }
