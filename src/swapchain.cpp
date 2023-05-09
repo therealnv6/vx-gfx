@@ -164,6 +164,34 @@ namespace gfx
         return render_pass(swapchain, samples, store_operation, load_operation, stencil_load_op, stencil_store_op, initial_layout, final_layout);
     }
 
+    void render_pass::begin(vk::CommandBuffer *buffer, uint32_t index, vk::ClearValue clear)
+    {
+        vk::Rect2D scissor {
+            {0, 0},
+            swapchain->extent
+        };
+        vk::Viewport viewport {
+            0.0f, 0.0f, static_cast<float>(swapchain->extent.width), static_cast<float>(swapchain->extent.height), 0.0f, 1.0f
+        };
+
+        vk::RenderPassBeginInfo render_pass_info {
+            this->pass,
+            this->framebuffers[index],
+            scissor,
+            1,
+            &clear,
+        };
+
+        buffer->beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
+        buffer->setViewport(0, viewport);
+        buffer->setScissor(0, scissor);
+    }
+
+    void render_pass::end(vk::CommandBuffer *buffer)
+    {
+        buffer->endRenderPass();
+    }
+
     void render_pass::cleanup()
     {
         for (auto framebuffer : framebuffers)

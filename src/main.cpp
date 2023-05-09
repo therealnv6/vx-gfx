@@ -37,29 +37,14 @@ int main()
         {
             glfwPollEvents();
             drawer.begin();
-            drawer.run([&](auto buffer, auto index)
-                {
-                    gfx::begin_render_pass(&render_pass,
-                        &swapchain,
-                        index,
-                        buffer,
-                        vk::Rect2D {
-                            { 0, 0 },
-                            swapchain.extent },
-                        gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
-
-                    buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
-                    buffer->draw(
-                        6, // 6 vertices
-                        1, // 1 instance
-                        0,
-                        0);
-
-                    buffer->endRenderPass(); //
-                });
+            drawer.run([&](auto buffer, auto index) {
+                render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 1.0 }));
+                buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
+                buffer->draw(6, 1, 0, 0);
+                render_pass.end(buffer); // we have to end the render pass!
+            });
         }
-    }
-    catch (std::exception &e)
+    } catch (std::exception &e)
     {
         spdlog::error("unable to instantiate vuxol, {}", e.what());
     }

@@ -12,8 +12,7 @@
 namespace gfx
 {
     // A structure that holds the swapchain's support details.
-    struct swapchain_support_details
-    {
+    struct swapchain_support_details {
         vk::SurfaceCapabilitiesKHR capabilities; // The surface's capabilities.
         std::vector<vk::SurfaceFormatKHR> formats; // The surface's available formats.
         std::vector<vk::PresentModeKHR> present_modes; // The surface's available present modes.
@@ -55,6 +54,9 @@ namespace gfx
 
         vk::ImageLayout initial_layout = vk::ImageLayout::eUndefined;
         vk::ImageLayout final_layout = vk::ImageLayout::ePresentSrcKHR;
+
+        void begin(vk::CommandBuffer *buffer, uint32_t index, vk::ClearValue clear);
+        void end(vk::CommandBuffer *buffer);
 
         // This function creates the Vulkan render pass for the pipeline.
         void create_render_pass();
@@ -127,8 +129,7 @@ namespace gfx
         gfx::device *device; // The device associated with the swapchain.
 
         // Function for choosing a swap surface format.
-        std::function<gfx::surface_format(gfx::surface_formats &available_formats)> choose_swap_surface = [](gfx::surface_formats &available_formats)
-        {
+        std::function<gfx::surface_format(gfx::surface_formats &available_formats)> choose_swap_surface = [](gfx::surface_formats &available_formats) {
             // Chooses the first available format that matches the desired format.
             for (const auto &available_format : available_formats)
             {
@@ -143,8 +144,7 @@ namespace gfx
         };
 
         // Function for choosing a present mode.
-        std::function<gfx::present_mode(const gfx::present_modes &available_present_modes)> choose_present_mode = [](const gfx::present_modes &available_present_modes)
-        {
+        std::function<gfx::present_mode(const gfx::present_modes &available_present_modes)> choose_present_mode = [](const gfx::present_modes &available_present_modes) {
             // Default present mode if no other is chosen.
             return gfx::present_mode::eImmediate;
         };

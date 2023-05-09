@@ -16,7 +16,23 @@ SpaceAfterTemplateKeyword: false
 SpacesInConditionalStatement: false
 SpacesInParentheses: false
 Standard: Latest
+AlignArrayOfStructures: Right
 TabWidth: 4
 UseTab: Never
+BreakBeforeBraces: Custom
 BraceWrapping:
-  BeforeLambdaBody: true
+  AfterClass: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeElse: true
+  BeforeWhile: false
+  BeforeCatch: false
+  BeforeLambdaBody: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+  AfterControlStatement: Always

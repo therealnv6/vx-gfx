@@ -5,9 +5,9 @@
 namespace validation
 {
     const std::vector<const char *> ENABLED_LAYERS = {
-// #ifdef NDEBUG // only have validation layers if NDEBUG is enabled.
+        // #ifdef NDEBUG // only have validation layers if NDEBUG is enabled.
         "VK_LAYER_KHRONOS_validation",
-// #endif
+        // #endif
     };
 
     vk::DebugUtilsMessengerEXT create_debug_messenger(vk::Instance *instance);

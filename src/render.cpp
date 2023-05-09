@@ -57,13 +57,13 @@ namespace gfx
         vk::PipelineStageFlags wait_stages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
         vk::SubmitInfo submit_info {
-           sizeof(wait_semaphores) / sizeof(vk::Semaphore),
-           wait_semaphores,
-           wait_stages,
-           1,
-           &commands->command_buffers[commands->current_frame],
-           sizeof(signal_semaphores) / sizeof(vk::Semaphore),
-           signal_semaphores,
+            sizeof(wait_semaphores) / sizeof(vk::Semaphore),
+            wait_semaphores,
+            wait_stages,
+            1,
+            &commands->command_buffers[commands->current_frame],
+            sizeof(signal_semaphores) / sizeof(vk::Semaphore),
+            signal_semaphores,
         };
 
         spdlog::debug("attempting to submit to device->graphics_queue");

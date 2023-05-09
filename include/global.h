@@ -6,8 +6,7 @@
 
 namespace gfx
 {
-    struct queue_family_indices
-    {
+    struct queue_family_indices {
         std::optional<uint32_t> graphics_family;
         std::optional<uint32_t> present_family;
 
