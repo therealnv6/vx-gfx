@@ -5,9 +5,9 @@
 #include <optional>
 #include <vector>
 
+#include <commands.h>
 #include <device.h>
 #include <swapchain.h>
-#include <commands.h>
 
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
@@ -46,7 +46,6 @@ namespace gfx
         gfx::device *device = nullptr;
         gfx::swapchain *swapchain = nullptr;
         gfx::commands *commands = nullptr;
-
 
     protected:
         vk::DebugUtilsMessengerEXT debugger;

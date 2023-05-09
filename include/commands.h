@@ -52,6 +52,7 @@ namespace gfx
         ~commands();
 
         void cleanup();
+
         void create_command_pool();
         void create_command_buffer();
         void create_sync_objects();

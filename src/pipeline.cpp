@@ -177,7 +177,6 @@ namespace gfx
         vk::Result result;
         vk::Pipeline pipeline;
 
-        // errors here. why?
         std::tie(result, pipeline) = device->logical_device.createGraphicsPipeline(nullptr, pipelineInfo);
 
         if (result != vk::Result::eSuccess)

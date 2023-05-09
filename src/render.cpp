@@ -2,6 +2,7 @@
 #include "device.h"
 #include <config.h>
 #include <render.h>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <vulkan/vulkan_handles.hpp>
 
@@ -23,7 +24,6 @@ namespace gfx
 
     void draw::begin()
     {
-
         if (device->logical_device.waitForFences(commands->in_flight_fences[commands->current_frame], true, UINT64_MAX) != vk::Result::eSuccess)
         {
             throw std::runtime_error("unable to wait for fence in_flight_fence!");
@@ -47,6 +47,8 @@ namespace gfx
 
         draw(&commands->command_buffers[commands->current_frame], image_index.value);
 
+        spdlog::info("just passed draw()");
+
         vk::Semaphore wait_semaphores[] = { commands->image_available_semaphores[commands->current_frame] };
         vk::Semaphore signal_semaphores[] = { commands->render_finished_semaphores[commands->current_frame] };
 
@@ -62,7 +64,9 @@ namespace gfx
             signal_semaphores,
         };
 
+        spdlog::info("attempting to submit to device->graphics_queue");
         device->graphics_queue.submit(submit_info, commands->in_flight_fences[commands->current_frame]);
+        spdlog::info("submmited to device->graphics_queue");
 
         vk::SwapchainKHR swap_chains[] = { swapchain->chain };
         vk::PresentInfoKHR present_info {
@@ -73,6 +77,7 @@ namespace gfx
             &image_index.value
         };
 
+        spdlog::info("trying to present to the surface");
         if (device->present_queue.presentKHR(present_info) != vk::Result::eSuccess)
         {
             throw std::runtime_error("unable to present info!");

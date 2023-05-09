@@ -25,12 +25,11 @@ int main()
         context.device = &device;
         context.commands = &commands;
 
+        gfx::draw drawer(&context);
         gfx::pipeline pipeline { &swapchain,
             "shadow",
             "build/triangle.vert.spv",
             "build/triangle.frag.spv" };
-
-        gfx::draw drawer(&context);
 
         drawer.begin();
         drawer.run([&](auto buffer, auto index)
