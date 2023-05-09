@@ -1,5 +1,8 @@
+#include "swapchain.h"
 #include <fstream>
 #include <pipeline.h>
+#include <spdlog/spdlog.h>
+#include <stdexcept>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -27,9 +30,13 @@ namespace gfx
         return buffer;
     }
 
-    pipeline::pipeline(gfx::swapchain *swapchain, const std::string &vert_shader_name, const std::string &frag_shader_name)
+    pipeline::pipeline(gfx::swapchain *swapchain,
+        const std::string &parent_pass,
+        const std::string &vert_shader_name,
+        const std::string &frag_shader_name)
         : swapchain { swapchain }
         , device { swapchain->device }
+        , pass { &swapchain->render_passes.at(parent_pass) }
     {
         this->create_graphics_pipeline(vert_shader_name, frag_shader_name);
     }
@@ -117,8 +124,17 @@ namespace gfx
             0.0f, // depthBiasSlopeFactor
             1.0);
 
-        vk::PipelineMultisampleStateCreateInfo multisampling({}, vk::SampleCountFlagBits::e1, false);
-        vk::PipelineColorBlendAttachmentState color_blend_attachment(true, vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd, vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd);
+        vk::PipelineMultisampleStateCreateInfo multisampling({},
+            vk::SampleCountFlagBits::e1,
+            false);
+
+        vk::PipelineColorBlendAttachmentState color_blend_attachment(true,
+            vk::BlendFactor::eSrcAlpha,
+            vk::BlendFactor::eOneMinusSrcAlpha,
+            vk::BlendOp::eAdd,
+            vk::BlendFactor::eOne,
+            vk::BlendFactor::eZero, vk::BlendOp::eAdd);
+
         color_blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR
             | vk::ColorComponentFlagBits::eG
             | vk::ColorComponentFlagBits::eB
@@ -136,6 +152,7 @@ namespace gfx
         );
 
         vk::PipelineLayoutCreateInfo pipeline_layout_info;
+
         vk::GraphicsPipelineCreateInfo pipelineInfo {
             {},
             sizeof(shader_stages) / sizeof(vk::PipelineShaderStageCreateInfo),
@@ -160,6 +177,7 @@ namespace gfx
         vk::Result result;
         vk::Pipeline pipeline;
 
+        // errors here. why?
         std::tie(result, pipeline) = device->logical_device.createGraphicsPipeline(nullptr, pipelineInfo);
 
         if (result != vk::Result::eSuccess)

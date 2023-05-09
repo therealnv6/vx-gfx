@@ -41,6 +41,7 @@ namespace gfx
 
         this->extent = this->choose_swap_extent(details.capabilities, window);
         this->create_swapchain(surface, details);
+        this->create_image_views();
     }
 
     void swapchain::create_swapchain(vk::SurfaceKHR &surface, gfx::swapchain_support_details details)

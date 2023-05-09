@@ -7,6 +7,7 @@
 
 #include <device.h>
 #include <swapchain.h>
+#include <commands.h>
 
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
@@ -41,17 +42,14 @@ namespace gfx
         vk::Instance instance;
         vk::SurfaceKHR surface;
 
-    protected:
-        // Command pool and buffers.
-        vk::CommandPool pool;
-        vk::DebugUtilsMessengerEXT debugger;
-        std::vector<vk::CommandBuffer> command_buffers;
+        // Pointer to device and swapchain objects.
+        gfx::device *device = nullptr;
+        gfx::swapchain *swapchain = nullptr;
+        gfx::commands *commands = nullptr;
 
-        // Semaphores and fences for synchronization.
-        std::vector<vk::Semaphore> image_available_semaphores;
-        std::vector<vk::Semaphore> render_finished_semaphores;
-        std::vector<vk::Fence> fences;
-        uint32_t current_frame = 0;
+
+    protected:
+        vk::DebugUtilsMessengerEXT debugger;
 
         // GLFW window.
         GLFWwindow *window;
@@ -59,10 +57,6 @@ namespace gfx
     private:
         const uint32_t WIDTH = 800;
         const uint32_t HEIGHT = 600;
-
-        // Pointer to device and swapchain objects.
-        gfx::device *device = nullptr;
-        gfx::swapchain *swapchain = nullptr;
 
         // Function for checking if validation support is available.
         bool has_validation_support();

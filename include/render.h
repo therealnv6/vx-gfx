@@ -1,34 +1,28 @@
 #pragma once
 
+#include <commands.h>
+#include <context.h>
 #include <device.h>
 #include <functional>
 #include <global.h>
-#include <stdexcept>
+#include <pipeline.h>
+#include <swapchain.h>
 
 namespace gfx
 {
-    class context;
-
-    class renderer
+    class draw
     {
-        typedef std::function<void(vk::CommandBuffer *, uint32_t)> command_buffer_record_type;
-        typedef std::function<vk::CommandBufferBeginInfo(gfx::context &context)> begin_type;
-
     public:
-        void draw(command_buffer_record_type record, begin_type begin_command);
+        draw(gfx::context *context);
+
+        void begin();
+        void run(
+            std::function<void(vk::CommandBuffer *buffer, uint32_t image_index)> draw);
 
     private:
         gfx::device *device;
-
-        command_buffer_record_type record = [](vk::CommandBuffer *buffer, uint32_t image_index)
-        {
-            throw std::runtime_error("renderer->record must be initialized!");
-        };
-
-        begin_type begin_command = [](gfx::context &context)
-        {
-            throw std::runtime_error("renderer->begin_command must be initialized!");
-            return vk::CommandBufferBeginInfo {};
-        };
+        gfx::context *context;
+        gfx::commands *commands;
+        gfx::swapchain *swapchain;
     };
 }

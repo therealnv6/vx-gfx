@@ -10,7 +10,7 @@ namespace validation
     typedef vk::DebugUtilsMessageSeverityFlagBitsEXT severity_flags;
     typedef vk::DebugUtilsMessageTypeFlagBitsEXT message_type_flag;
 
-   inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+    inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
     {
         auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
         if (func != nullptr)
@@ -23,7 +23,7 @@ namespace validation
         }
     }
 
-    inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+    inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
     {
         auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
         if (func != nullptr)
@@ -51,6 +51,10 @@ namespace validation
         else if (severity == severity_flags::eWarning)
         {
             spdlog::warn("validation layer: {}", pCallbackData->pMessage);
+        }
+        else if (severity == severity_flags::eVerbose)
+        {
+            spdlog::debug("validation layer: {}", pCallbackData->pMessage);
         }
 
         return VK_FALSE;
