@@ -8,6 +8,7 @@
 #include <validation.h>
 #include <vector>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 namespace gfx
@@ -32,7 +33,7 @@ namespace gfx
         std::tie(physical_device, indices) = suitable_device.value();
         this->physical_device = physical_device;
 
-        vk::DeviceQueueCreateInfo queue_create_info({}, indices.graphics_family.value(), 1, &this->queue_priority);
+        vk::DeviceQueueCreateInfo queue_create_info({}, 0, 1, &queue_priority);
         vk::PhysicalDeviceFeatures device_features;
 
         vk::DeviceCreateInfo device_create_info({},
@@ -113,20 +114,22 @@ namespace gfx
 
         for (const auto &queue_family : queue_family_properties)
         {
+            if (queue_family.queueFlags & vk::QueueFlagBits::eGraphics)
+            {
+                indices.graphics_family = i;
+            }
+
+            if (device->getSurfaceSupportKHR(i, *surface))
+            {
+                indices.present_family = i;
+            }
+
             if (indices.is_complete())
             {
                 break;
             }
 
-            if (queue_family.queueFlags & queue_flags)
-            {
-                indices.graphics_family = i;
-
-                if (device->getSurfaceSupportKHR(i, *surface))
-                {
-                    indices.present_family = i;
-                }
-            }
+            i++;
         }
 
         return indices;
@@ -135,7 +138,6 @@ namespace gfx
     uint32_t device::evaluate_device(vk::PhysicalDevice physical_device, gfx::queue_family_indices indices)
     {
         int evaluation = 0;
-        bool extensions_supported = false;
 
         std::vector<vk::ExtensionProperties> available_extensions = physical_device.enumerateDeviceExtensionProperties();
         std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
@@ -145,13 +147,13 @@ namespace gfx
             required_extensions.erase(extension.extensionName);
         }
 
-        if (!required_extensions.empty())
+        if (!required_extensions.empty() || !indices.is_complete())
         {
-            return 0;
-        }
-
-        if (!indices.is_complete())
-        {
+            spdlog::warn("skipping device {}, not suited, missing extensions:", physical_device.getProperties().deviceName);
+            for (auto extension : required_extensions)
+            {
+                std::cout << extension << std::endl;
+            }
             return 0;
         }
 

@@ -2,6 +2,7 @@
 #include <functional>
 #include <global.h>
 #include <optional>
+#include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 
 namespace gfx

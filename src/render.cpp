@@ -4,6 +4,7 @@
 #include <render.h>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
 namespace gfx
@@ -46,8 +47,9 @@ namespace gfx
             commands->image_available_semaphores[commands->current_frame]);
 
         draw(&commands->command_buffers[commands->current_frame], image_index.value);
+        commands->command_buffers[commands->current_frame].end();
 
-        spdlog::info("just passed draw()");
+        spdlog::debug("just passed draw()");
 
         vk::Semaphore wait_semaphores[] = { commands->image_available_semaphores[commands->current_frame] };
         vk::Semaphore signal_semaphores[] = { commands->render_finished_semaphores[commands->current_frame] };
@@ -55,18 +57,18 @@ namespace gfx
         vk::PipelineStageFlags wait_stages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
         vk::SubmitInfo submit_info {
-            sizeof(wait_semaphores) / sizeof(vk::Semaphore),
-            wait_semaphores,
-            wait_stages,
-            1,
-            &commands->command_buffers[commands->current_frame],
-            sizeof(signal_semaphores) / sizeof(vk::Semaphore),
-            signal_semaphores,
+           sizeof(wait_semaphores) / sizeof(vk::Semaphore),
+           wait_semaphores,
+           wait_stages,
+           1,
+           &commands->command_buffers[commands->current_frame],
+           sizeof(signal_semaphores) / sizeof(vk::Semaphore),
+           signal_semaphores,
         };
 
-        spdlog::info("attempting to submit to device->graphics_queue");
+        spdlog::debug("attempting to submit to device->graphics_queue");
         device->graphics_queue.submit(submit_info, commands->in_flight_fences[commands->current_frame]);
-        spdlog::info("submmited to device->graphics_queue");
+        spdlog::debug("submmited to device->graphics_queue");
 
         vk::SwapchainKHR swap_chains[] = { swapchain->chain };
         vk::PresentInfoKHR present_info {
@@ -77,7 +79,7 @@ namespace gfx
             &image_index.value
         };
 
-        spdlog::info("trying to present to the surface");
+        spdlog::debug("trying to present to the surface");
         if (device->present_queue.presentKHR(present_info) != vk::Result::eSuccess)
         {
             throw std::runtime_error("unable to present info!");

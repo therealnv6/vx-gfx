@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "device.h"
 #include "spdlog/spdlog.h"
 #include <context.h>
@@ -31,34 +32,38 @@ int main()
             "build/triangle.vert.spv",
             "build/triangle.frag.spv" };
 
-        drawer.begin();
-        drawer.run([&](auto buffer, auto index)
-            {
-                vk::ClearValue clear_value({ 0.0f, 0.0f, 0.0f, 1.0f });
-                vk::Rect2D scissor {
-                    { 0, 0 },
-                    swapchain.extent
-                };
+        while (true)
+        {
+            glfwPollEvents();
+            drawer.begin();
+            drawer.run([&](auto buffer, auto index)
+                {
+                    vk::ClearValue clear_value({ 0.0f, 0.0f, 0.0f, 1.0f });
+                    vk::Rect2D scissor {
+                        { 0, 0 },
+                        swapchain.extent
+                    };
 
-                vk::Viewport viewport {
-                    0.0f, 0.0f, static_cast<float>(swapchain.extent.width), static_cast<float>(swapchain.extent.height), 0.0f, 1.0f
-                };
+                    vk::Viewport viewport {
+                        0.0f, 0.0f, static_cast<float>(swapchain.extent.width), static_cast<float>(swapchain.extent.height), 0.0f, 1.0f
+                    };
 
-                vk::RenderPassBeginInfo render_pass_info {
-                    render_pass->pass,
-                    render_pass->framebuffers[index],
-                    scissor,
-                    1,
-                    &clear_value,
-                };
+                    vk::RenderPassBeginInfo render_pass_info {
+                        render_pass->pass,
+                        render_pass->framebuffers[index],
+                        scissor,
+                        1,
+                        &clear_value,
+                    };
 
-                buffer->beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
-                buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
-                buffer->setViewport(0, viewport);
-                buffer->setScissor(0, scissor);
-                buffer->draw(6, 1, 0, 0);
-                buffer->endRenderPass(); //
-            });
+                    buffer->beginRenderPass(render_pass_info, vk::SubpassContents::eInline);
+                    buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
+                    buffer->setViewport(0, viewport);
+                    buffer->setScissor(0, scissor);
+                    buffer->draw(6, 1, 0, 0);
+                    buffer->endRenderPass(); //
+                });
+        }
     }
     catch (std::exception &e)
     {

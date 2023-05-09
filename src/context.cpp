@@ -76,6 +76,11 @@ namespace gfx
             0, nullptr, // no validation layers
             extensions.size(), extensions.data()); // GLFW extensions
 
+        if (validation::enable_validation_layers())
+        {
+            instance_info.setPEnabledLayerNames(validation::ENABLED_LAYERS);
+        }
+
         this->instance = vk::createInstance(instance_info); // create the Vulkan instance
 
         if (validation::enable_validation_layers())
