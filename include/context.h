@@ -46,12 +46,10 @@ namespace gfx
         gfx::device *device = nullptr;
         gfx::swapchain *swapchain = nullptr;
         gfx::commands *commands = nullptr;
+        GLFWwindow *window;
 
     protected:
         vk::DebugUtilsMessengerEXT debugger;
-
-        // GLFW window.
-        GLFWwindow *window;
 
     private:
         const uint32_t WIDTH = 800;

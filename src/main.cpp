@@ -1,10 +1,12 @@
 #include "GLFW/glfw3.h"
 #include "device.h"
 #include "spdlog/spdlog.h"
+#include <buffer.h>
 #include <context.h>
 #include <render.h>
 #include <swapchain.h>
 #include <util.h>
+#include <vertex.h>
 
 int main()
 {
@@ -16,7 +18,6 @@ int main()
 
         // we have to initialize the swapchain __before__ we do anything else with the swapchain!
         context.init_swap_chain(&swapchain);
-
         swapchain.add_render_pass(
             "shadow", gfx::start_render_pass(&swapchain) // add a new render_pass to the swapchain by name "shadow"
         );
@@ -33,16 +34,33 @@ int main()
             "build/triangle.vert.spv",
             "build/triangle.frag.spv" };
 
-        while (true)
+        pipeline.binding_descriptions.push_back(gfx::vertex::get_binding_description());
+
+        for (auto attribute : gfx::vertex::get_attribute_descriptions())
         {
-            glfwPollEvents();
+            pipeline.attribute_descriptions.push_back(attribute);
+        }
+
+        const std::vector<gfx::vertex> vertices = {
+            {{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
+            { { 0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f }},
+            {{ -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }}
+        };
+
+        gfx::vertex_buffer<gfx::vertex, 3> vertex_buffer(&device, vertices);
+
+        while (!glfwWindowShouldClose(context.window))
+        {
             drawer.begin();
-            drawer.run([&](auto buffer, auto index) {
+            drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 1.0 }));
                 buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
-                buffer->draw(6, 1, 0, 0);
+                buffer->bindVertexBuffers(0, vertex_buffer.inner(), { 0 });
+                buffer->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
                 render_pass.end(buffer); // we have to end the render pass!
             });
+            glfwPollEvents();
+            device.logical_device.waitIdle();
         }
     } catch (std::exception &e)
     {

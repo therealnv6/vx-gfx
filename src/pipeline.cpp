@@ -78,10 +78,10 @@ namespace gfx
 
         vk::PipelineShaderStageCreateInfo shader_stages[] = { fragment_shader_stage_info, vertex_shader_stage_info };
         vk::PipelineVertexInputStateCreateInfo vertex_input_info({},
-            0, // vertexBindingDescriptionCount
-            nullptr, // vertexBindingDescriptions
-            0, // vertexAttributeDescriptionCount
-            nullptr // pVertexAttributeDescriptions
+            this->binding_descriptions.size(), // vertexBindingDescriptionCount
+            this->binding_descriptions.data(), // vertexBindingDescriptions
+            this->attribute_descriptions.size(), // vertexAttributeDescriptionCount
+            this->attribute_descriptions.data() // pVertexAttributeDescriptions
         );
 
         vk::PipelineInputAssemblyStateCreateInfo input_assembly_info({},

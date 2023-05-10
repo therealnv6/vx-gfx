@@ -23,6 +23,9 @@ namespace gfx
             vk::DynamicState::eScissor, // The dynamic scissor state.
         };
 
+        std::vector<vk::VertexInputBindingDescription> binding_descriptions;
+        std::vector<vk::VertexInputAttributeDescription> attribute_descriptions;
+
         // The constructor for the pipeline class.
         pipeline(gfx::swapchain *swapchain,
             const std::string &parent_pass,
