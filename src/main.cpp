@@ -29,17 +29,20 @@ int main()
         context.commands = &commands;
 
         gfx::draw drawer(&context);
-        gfx::pipeline pipeline { &swapchain,
+        gfx::pipeline pipeline {
+            &swapchain,
             "shadow",
             "build/triangle.vert.spv",
-            "build/triangle.frag.spv" };
+            "build/triangle.frag.spv",
+        };
 
-        pipeline.binding_descriptions.push_back(gfx::vertex::get_binding_description());
+        // todo: think of a more elegant way to do this. 
+        pipeline.bind_struct<gfx::vertex>(
+            gfx::vertex::get_binding_description(),
+            gfx::vertex::get_attribute_descriptions()
+        );
 
-        for (auto attribute : gfx::vertex::get_attribute_descriptions())
-        {
-            pipeline.attribute_descriptions.push_back(attribute);
-        }
+        pipeline.initialize();
 
         const std::vector<gfx::vertex> vertices = {
             {{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
@@ -48,6 +51,7 @@ int main()
         };
 
         gfx::vertex_buffer<gfx::vertex, 3> vertex_buffer(&device, vertices);
+
 
         while (!glfwWindowShouldClose(context.window))
         {

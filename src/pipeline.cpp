@@ -1,4 +1,5 @@
 #include "swapchain.h"
+#include "vertex.h"
 #include <fstream>
 #include <pipeline.h>
 #include <spdlog/spdlog.h>
@@ -32,13 +33,14 @@ namespace gfx
 
     pipeline::pipeline(gfx::swapchain *swapchain,
         const std::string &parent_pass,
-        const std::string &vert_shader_name,
-        const std::string &frag_shader_name)
+        const std::string vert_shader_name,
+        const std::string frag_shader_name)
         : swapchain { swapchain }
         , device { swapchain->device }
         , pass { &swapchain->render_passes.at(parent_pass) }
+        , vert_shader_name { vert_shader_name }
+        , frag_shader_name { frag_shader_name }
     {
-        this->create_graphics_pipeline(vert_shader_name, frag_shader_name);
     }
 
     void pipeline::cleanup()
@@ -56,7 +58,31 @@ namespace gfx
         return module;
     }
 
-    void pipeline::create_graphics_pipeline(const std::string &vert_shader_name, const std::string &frag_shader_name)
+    void pipeline::initialize()
+    {
+        this->create_graphics_pipeline();
+    }
+
+    template<typename T>
+    void pipeline::bind()
+    {
+        throw std::runtime_error("not supported!");
+    }
+
+    template<typename T>
+    void pipeline::bind_struct(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes)
+    {
+        this->binding_descriptions.push_back(binding);
+
+        for (auto attribute : attributes)
+        {
+            this->attribute_descriptions.push_back(attribute);
+        }
+    }
+
+    template void pipeline::bind_struct<gfx::vertex>(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes);
+
+    void pipeline::create_graphics_pipeline()
     {
         auto vert_code = gfx::read_file(vert_shader_name);
         auto frag_code = gfx::read_file(frag_shader_name);
@@ -99,7 +125,6 @@ namespace gfx
         );
 
         vk::Rect2D scissor({ 0, 0 }, swapchain->extent);
-
         vk::PipelineDynamicStateCreateInfo dynamic_state_info({},
             static_cast<uint32_t>(dynamic_states.size()), // dynamicStateCount
             dynamic_states.data() // pDynamicStates
@@ -152,7 +177,6 @@ namespace gfx
         );
 
         vk::PipelineLayoutCreateInfo pipeline_layout_info;
-
         vk::GraphicsPipelineCreateInfo pipelineInfo {
             {},
             sizeof(shader_stages) / sizeof(vk::PipelineShaderStageCreateInfo),

@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -19,11 +18,11 @@ namespace gfx
             };
         }
 
-        static std::array<vk::VertexInputAttributeDescription, 2> get_attribute_descriptions()
+        static std::vector<vk::VertexInputAttributeDescription> get_attribute_descriptions()
         {
-            return std::array<vk::VertexInputAttributeDescription, 2> {
+            return std::vector<vk::VertexInputAttributeDescription> {
                 vk::VertexInputAttributeDescription {0, 0,    vk::Format::eR32G32Sfloat, offsetof(gfx::vertex,   pos)},
-                vk::VertexInputAttributeDescription {0, 1, vk::Format::eR32G32B32Sfloat, offsetof(gfx::vertex, color)}
+                vk::VertexInputAttributeDescription {1, 0, vk::Format::eR32G32B32Sfloat, offsetof(gfx::vertex, color)}
             };
         }
     };

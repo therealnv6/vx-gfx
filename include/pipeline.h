@@ -29,14 +29,22 @@ namespace gfx
         // The constructor for the pipeline class.
         pipeline(gfx::swapchain *swapchain,
             const std::string &parent_pass,
-            const std::string &vert_shader_name,
-            const std::string &frag_shader_name);
+            const std::string vert_shader_name,
+            const std::string frag_shader_name);
 
         // The destructor for the pipeline class.
         ~pipeline()
         {
             this->cleanup();
         }
+
+        void initialize();
+
+        template<typename T>
+        void bind();
+
+        template<typename T>
+        void bind_struct(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>);
 
         // This function cleans up the pipeline and releases any allocated resources.
         void cleanup();
@@ -46,11 +54,11 @@ namespace gfx
             const std::vector<char> &code);
 
         // This function creates the graphics pipeline using the provided vertex and fragment shader names.
-        void create_graphics_pipeline(
-            const std::string &vert_shader_name,
-            const std::string &frag_shader_name);
+        void create_graphics_pipeline();
 
     private:
+        const std::string vert_shader_name;
+        const std::string frag_shader_name;
         gfx::device *device; // A pointer to the device object.
         gfx::swapchain *swapchain; // A pointer to the swapchain object.
     };

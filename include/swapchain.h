@@ -146,7 +146,7 @@ namespace gfx
         // Function for choosing a present mode.
         std::function<gfx::present_mode(const gfx::present_modes &available_present_modes)> choose_present_mode = [](const gfx::present_modes &available_present_modes) {
             // Default present mode if no other is chosen.
-            return gfx::present_mode::eImmediate;
+            return gfx::present_mode::eFifo;
         };
 
         // Initializes the swapchain object.
