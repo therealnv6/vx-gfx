@@ -4,7 +4,7 @@
 
 namespace gfx
 {
-    commands::commands(gfx::swapchain *swapchain, vk::SurfaceKHR *surface)
+    commands::commands(std::shared_ptr<gfx::swapchain> swapchain, vk::SurfaceKHR *surface)
         : swapchain { swapchain }
         , device { swapchain->device }
         , surface { surface }
@@ -21,7 +21,9 @@ namespace gfx
 
     void commands::cleanup()
     {
-        spdlog::warn("todo: clean up commands!");
+        spdlog::info("cleaning up gfx::commands");
+        device->logical_device.destroyCommandPool(this->command_pool);
+        spdlog::info("... done!");
     }
 
     void commands::create_command_pool()

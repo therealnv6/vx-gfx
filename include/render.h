@@ -13,16 +13,16 @@ namespace gfx
     class draw
     {
     public:
-        draw(gfx::context *context);
+        draw(std::shared_ptr<gfx::context> context);
 
         void begin();
         void run(
             std::function<void(vk::CommandBuffer *buffer, uint32_t image_index)> draw);
 
     private:
-        gfx::device *device;
-        gfx::context *context;
-        gfx::commands *commands;
-        gfx::swapchain *swapchain;
+        std::shared_ptr<gfx::device> device;
+        std::shared_ptr<gfx::context> context;
+        std::shared_ptr<gfx::commands> commands;
+        std::shared_ptr<gfx::swapchain> swapchain;
     };
 }

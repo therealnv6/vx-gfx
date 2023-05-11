@@ -9,7 +9,7 @@
 
 namespace gfx
 {
-    draw::draw(gfx::context *context)
+    draw::draw(std::shared_ptr<gfx::context> context)
         : context { context }
         , device { context->device }
         , commands { context->commands }

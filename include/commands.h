@@ -48,7 +48,7 @@ namespace gfx
          *
          * @param swaphcain A pointer to the [gfx::swapchain] object to be used for Vulkan API calls.
          */
-        commands(gfx::swapchain *swapchain, vk::SurfaceKHR *surface);
+        commands(std::shared_ptr<gfx::swapchain> swapchain, vk::SurfaceKHR *surface);
         ~commands();
 
         void cleanup();
@@ -58,8 +58,8 @@ namespace gfx
         void create_sync_objects();
 
     private:
-        gfx::swapchain *swapchain;
-        gfx::device *device;
+        std::shared_ptr<gfx::swapchain> swapchain;
+        std::shared_ptr<gfx::device> device;
         vk::SurfaceKHR *surface;
     };
 }

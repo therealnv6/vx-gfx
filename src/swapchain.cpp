@@ -141,7 +141,7 @@ namespace gfx
         }
     }
 
-    render_pass::render_pass(gfx::swapchain *swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
+    render_pass::render_pass(std::shared_ptr<gfx::swapchain> swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
         : swapchain(swapchain)
         , device { swapchain->device }
     {
@@ -159,7 +159,7 @@ namespace gfx
         this->create_frame_buffers();
     }
 
-    render_pass start_render_pass(gfx::swapchain *swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
+    render_pass start_render_pass(std::shared_ptr<gfx::swapchain> swapchain, vk::SampleCountFlags samples, vk::AttachmentStoreOp store_operation, vk::AttachmentLoadOp load_operation, vk::AttachmentLoadOp stencil_load_op, vk::AttachmentStoreOp stencil_store_op, vk::ImageLayout initial_layout, vk::ImageLayout final_layout)
     {
         return render_pass(swapchain, samples, store_operation, load_operation, stencil_load_op, stencil_store_op, initial_layout, final_layout);
     }
@@ -194,12 +194,14 @@ namespace gfx
 
     void render_pass::cleanup()
     {
+        spdlog::info("cleaning up gfx::render_pass");
         for (auto framebuffer : framebuffers)
         {
             device->logical_device.destroyFramebuffer(framebuffer);
         }
 
         device->logical_device.destroyRenderPass(pass);
+        spdlog::info("... done!");
     }
 
     void render_pass::create_render_pass()

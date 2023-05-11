@@ -33,7 +33,7 @@ namespace gfx
     }
 
     // Initializes the swap chain for the context.
-    void context::init_swap_chain(gfx::swapchain *swapchain)
+    void context::init_swap_chain(std::shared_ptr<gfx::swapchain> swapchain)
     {
         spdlog::info("initializing swapchain of gfx::context");
 

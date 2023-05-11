@@ -31,7 +31,7 @@ namespace gfx
         return buffer;
     }
 
-    pipeline::pipeline(gfx::swapchain *swapchain,
+    pipeline::pipeline(std::shared_ptr<gfx::swapchain> swapchain,
         const std::string &parent_pass,
         const std::string vert_shader_name,
         const std::string frag_shader_name)

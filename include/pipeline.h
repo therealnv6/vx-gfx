@@ -16,7 +16,7 @@ namespace gfx
     {
     public:
         vk::Pipeline vk_pipeline; // The Vulkan pipeline handle.
-        gfx::render_pass *pass;
+        std::shared_ptr<gfx::render_pass> pass;
 
         std::vector<vk::DynamicState> dynamic_states = {
             vk::DynamicState::eViewport, // The dynamic viewport state.
@@ -27,7 +27,7 @@ namespace gfx
         std::vector<vk::VertexInputAttributeDescription> attribute_descriptions;
 
         // The constructor for the pipeline class.
-        pipeline(gfx::swapchain *swapchain,
+        pipeline(std::shared_ptr<gfx::swapchain> swapchain,
             const std::string &parent_pass,
             const std::string vert_shader_name,
             const std::string frag_shader_name);
@@ -59,7 +59,7 @@ namespace gfx
     private:
         const std::string vert_shader_name;
         const std::string frag_shader_name;
-        gfx::device *device; // A pointer to the device object.
-        gfx::swapchain *swapchain; // A pointer to the swapchain object.
+        std::shared_ptr<gfx::device> device; // A pointer to the device object.
+        std::shared_ptr<gfx::swapchain> swapchain; // A pointer to the swapchain object.
     };
 }

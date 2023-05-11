@@ -36,16 +36,16 @@ namespace gfx
             this->cleanup();
         };
         // Initializes the swapchain for this context.
-        void init_swap_chain(swapchain *swapchain);
+        void init_swap_chain(std::shared_ptr<gfx::swapchain> swapchain);
 
         // Vulkan instance and surface.
         vk::Instance instance;
         vk::SurfaceKHR surface;
 
         // Pointer to device and swapchain objects.
-        gfx::device *device = nullptr;
-        gfx::swapchain *swapchain = nullptr;
-        gfx::commands *commands = nullptr;
+        std::shared_ptr<gfx::device> device = nullptr;
+        std::shared_ptr<gfx::swapchain> swapchain = nullptr;
+        std::shared_ptr<gfx::commands> commands = nullptr;
         GLFWwindow *window;
 
     protected:

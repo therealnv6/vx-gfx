@@ -68,7 +68,7 @@ namespace gfx
         void cleanup();
 
         // Constructor for the render_pass class.
-        render_pass(gfx::swapchain *swapchain,
+        render_pass(std::shared_ptr<gfx::swapchain> swapchain,
             vk::SampleCountFlags samples,
             vk::AttachmentStoreOp store_operation,
             vk::AttachmentLoadOp load_operation,
@@ -79,8 +79,8 @@ namespace gfx
 
     private:
         // The parent swapchain and device the render pass belongs to.
-        gfx::swapchain *swapchain;
-        gfx::device *device;
+        std::shared_ptr<gfx::swapchain> swapchain;
+        std::shared_ptr<gfx::device> device;
     };
 
     /**
@@ -96,7 +96,7 @@ namespace gfx
      * @param final_layout - The final layout of the attachment.
      * @return A new render_pass object with the specified configuration.
      */
-    render_pass start_render_pass(gfx::swapchain *swapchain,
+    render_pass start_render_pass(std::shared_ptr<gfx::swapchain> swapchain, 
         vk::SampleCountFlags samples = vk::SampleCountFlagBits::e1,
         vk::AttachmentStoreOp store_operation = vk::AttachmentStoreOp::eStore,
         vk::AttachmentLoadOp load_operation = vk::AttachmentLoadOp::eClear,
@@ -126,7 +126,7 @@ namespace gfx
         vk::Format image_format; // The format of the swapchain's images.
         vk::Extent2D extent; // The extent of the swapchain's images.
 
-        gfx::device *device; // The device associated with the swapchain.
+        std::shared_ptr<gfx::device> device; // The device associated with the swapchain.
 
         // Function for choosing a swap surface format.
         std::function<gfx::surface_format(gfx::surface_formats &available_formats)> choose_swap_surface = [](gfx::surface_formats &available_formats) {
@@ -168,7 +168,7 @@ namespace gfx
         vk::Extent2D choose_swap_extent(const vk::SurfaceCapabilitiesKHR &capabilities, GLFWwindow *window);
 
         // Constructor for the swapchain class.
-        swapchain(gfx::device *device)
+        swapchain(std::shared_ptr<gfx::device> device)
             : device { device } {};
 
         ~swapchain();

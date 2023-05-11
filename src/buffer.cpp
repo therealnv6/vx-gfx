@@ -5,7 +5,8 @@
 namespace gfx
 {
     template<typename T, uint32_t SIZE>
-    vertex_buffer<T, SIZE>::vertex_buffer(gfx::device *device, const std::vector<T> &elements)
+    vertex_buffer<T, SIZE>::vertex_buffer(std::shared_ptr<gfx::device> device, const std::vector<T> &elements)
+        : device { device }
     {
         vk::DeviceSize buffer_size = sizeof(T) * SIZE;
         vk::BufferCreateInfo buffer_create_info({},
@@ -16,7 +17,7 @@ namespace gfx
         this->buffer = device->logical_device.createBuffer(buffer_create_info);
 
         vk::MemoryRequirements memory_requirements = device->logical_device.getBufferMemoryRequirements(buffer);
-        vk::MemoryAllocateInfo allocate_info(memory_requirements.size, this->find_memory_type(device, memory_requirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+        vk::MemoryAllocateInfo allocate_info(memory_requirements.size, this->find_memory_type(*device, memory_requirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
 
         this->memory = device->logical_device.allocateMemory(allocate_info);
 
@@ -30,14 +31,16 @@ namespace gfx
     template<typename T, uint32_t SIZE>
     vertex_buffer<T, SIZE>::~vertex_buffer()
     {
+        spdlog::info("cleaning up gfx::vertex_buffer");
         device->logical_device.destroyBuffer(buffer);
         device->logical_device.freeMemory(memory);
+        spdlog::info("... done!");
     }
 
     template<typename T, uint32_t SIZE>
-    uint32_t vertex_buffer<T, SIZE>::find_memory_type(gfx::device *device, uint32_t type_filter, vk::MemoryPropertyFlags properties)
+    uint32_t vertex_buffer<T, SIZE>::find_memory_type(gfx::device &device, uint32_t type_filter, vk::MemoryPropertyFlags properties)
     {
-        vk::PhysicalDevice physical_device = device->physical_device;
+        vk::PhysicalDevice physical_device = device.physical_device;
         vk::PhysicalDeviceMemoryProperties mem_properties = physical_device.getMemoryProperties();
 
         for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++)
