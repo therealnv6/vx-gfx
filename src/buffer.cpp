@@ -1,3 +1,4 @@
+#include "util.h"
 #include <buffer.h>
 #include <device.h>
 #include <vertex.h>
@@ -53,7 +54,7 @@ namespace gfx
         throw std::runtime_error("Failed to find suitable memory type for buffer.");
     }
     template<typename T>
-    vma_buffer<T>::vma_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const std::vector<T> &data, vk::BufferUsageFlags usage, VmaMemoryUsage vma_usage)
+    vma_buffer<T>::vma_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const std::vector<T> &data, vk::BufferUsageFlags usage, vma::memory_usage memory_usage)
         : device(device)
     {
         auto size = sizeof(T) * data.size();
@@ -84,7 +85,7 @@ namespace gfx
         // Create the device buffer.
         {
             vk::BufferCreateInfo device_buffer_info({}, size, usage | vk::BufferUsageFlagBits::eTransferDst, vk::SharingMode::eExclusive);
-            VmaAllocationCreateInfo device_alloc_info = { 0, vma_usage };
+            VmaAllocationCreateInfo device_alloc_info = { 0, vma::to_vma_memory_usage(memory_usage) };
 
             VkBufferCreateInfo device_info = static_cast<VkBufferCreateInfo>(device_buffer_info);
             VkBuffer buffer;

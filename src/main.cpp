@@ -74,7 +74,7 @@ int main()
         pipeline.initialize();
 
         // create vertex buffer object
-        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, VMA_MEMORY_USAGE_GPU_ONLY);
+        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
 
         // render loop
         while (!glfwWindowShouldClose(context->window))

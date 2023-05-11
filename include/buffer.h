@@ -2,6 +2,7 @@
 
 #include <commands.h>
 #include <memory>
+#include <util.h>
 #include <vector>
 #include <vertex.h>
 #include <vk_mem_alloc.h>
@@ -37,7 +38,7 @@ namespace gfx
     class vma_buffer
     {
     public:
-        vma_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const std::vector<T> &data, vk::BufferUsageFlags usage, VmaMemoryUsage vma_usage);
+        vma_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const std::vector<T> &data, vk::BufferUsageFlags usage, vma::memory_usage memory_usage);
         ~vma_buffer();
 
         vk::Buffer get_buffer() const
