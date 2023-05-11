@@ -21,6 +21,8 @@ const std::vector<gfx::vertex> vertices = {
 };
 
 // initialize graphics context, device and swapchain
+// this is just a simple testing environment/playground for me, this is not 
+// supposed to be used as a part of the library.
 int main()
 {
     try
@@ -62,6 +64,8 @@ int main()
             "build/triangle.frag.spv",
         };
 
+        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::CpuToGpu);
+
         // bind vertex buffer and attribute descriptions
         // clang-format off
         pipeline.bind_struct<gfx::vertex>(
@@ -73,30 +77,34 @@ int main()
         // initialize the pipeline object
         pipeline.initialize();
 
-        // create vertex buffer object
-        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
+        uint32_t frame_time = 0.0;
+        double last_time = glfwGetTime();
 
+        // create vertex buffer object
         // render loop
         while (!glfwWindowShouldClose(context->window))
         {
+
+            frame_time++;
+            auto current_time = glfwGetTime();
+            auto elapsed_time = current_time - last_time;
+
+            if (elapsed_time >= 1.0)
+            {
+                glfwSetWindowTitle(context->window, std::to_string(frame_time).c_str());
+                frame_time = 0;
+                last_time = current_time;
+            }
+
             // begin drawing commands
             drawer.begin();
 
             // run commands within the draw object
-            drawer.run([&](vk::CommandBuffer *buffer, auto index) {
-                // begin render pass
+            drawer.run([&](vk::CommandBuffer *buffer, auto index) {                
                 render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
-
-                // bind pipeline
                 buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
-
-                // bind vertex buffer
                 buffer->bindVertexBuffers(0, vertex_buffer.get_buffer(), { 0 });
-
-                // draw vertices
                 buffer->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-
-                // end render pass
                 render_pass.end(buffer);
             });
 
