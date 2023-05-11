@@ -54,8 +54,13 @@ namespace gfx
         void cleanup();
 
         void create_command_pool();
-        void create_command_buffer();
+        void initialize_command_buffers();
         void create_sync_objects();
+
+        void submit_and_wait(const vk::CommandBuffer &command_buffer);
+        void begin(const vk::CommandBuffer &command_buffer);
+
+        vk::CommandBuffer start_small_buffer();
 
     private:
         std::shared_ptr<gfx::swapchain> swapchain;

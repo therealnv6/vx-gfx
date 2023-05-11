@@ -13,6 +13,7 @@ find_package(Vulkan REQUIRED)
 find_package(spdlog REQUIRED)
 
 add_subdirectory(thirdparty/glfw)
+add_subdirectory(thirdparty/vma)
 
 file(GLOB SOURCES 
     "src/*.cpp"
@@ -27,10 +28,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
     # "thirdparty/Vulkan-Headers/include/"
     "thirdparty/glfw/include/"
+    "thirdparty/vma/include"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     glfw 
+    VulkanMemoryAllocator
     spdlog::spdlog
     Vulkan::Vulkan
 )

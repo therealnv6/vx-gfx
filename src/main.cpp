@@ -1,3 +1,7 @@
+#define VMA_IMPLEMENTATION
+#define VMA_VULKAN_VERSION 1003000
+#define VMA_DEBUG_REPORT 1
+#include "vk_mem_alloc.h"
 #include <GLFW/glfw3.h>
 #include <buffer.h>
 #include <context.h>
@@ -8,6 +12,13 @@
 #include <swapchain.h>
 #include <util.h>
 #include <vertex.h>
+#include <vulkan/vulkan_enums.hpp>
+
+const std::vector<gfx::vertex> vertices = {
+    {{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
+    { { 0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f }},
+    {{ -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }}
+};
 
 // initialize graphics context, device and swapchain
 int main()
@@ -62,15 +73,8 @@ int main()
         // initialize the pipeline object
         pipeline.initialize();
 
-        // create vertex data
-        const std::vector<gfx::vertex> vertices = {
-            {{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
-            { { 0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f }},
-            {{ -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }}
-        };
-
         // create vertex buffer object
-        gfx::vertex_buffer<gfx::vertex, 3> vertex_buffer(device, vertices);
+        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, VMA_MEMORY_USAGE_GPU_ONLY);
 
         // render loop
         while (!glfwWindowShouldClose(context->window))
@@ -81,7 +85,7 @@ int main()
             // run commands within the draw object
             drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 // begin render pass
-                render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 1.0 }));
+                render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
 
                 // bind pipeline
                 buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);

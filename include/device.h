@@ -1,4 +1,5 @@
 #pragma once
+#include <vk_mem_alloc.h>
 #include <functional>
 #include <global.h>
 #include <optional>
@@ -23,6 +24,8 @@ namespace gfx
         vk::Queue graphics_queue;
         vk::Queue present_queue;
 
+        VmaAllocator allocator;
+
         const vk::QueueFlags queue_flags = vk::QueueFlagBits::eGraphics;
 
         // Function for checking if a physical device is suitable for use.
@@ -40,6 +43,21 @@ namespace gfx
 
         gfx::queue_family_indices find_queue_families(const vk::SurfaceKHR *surface, std::optional<vk::PhysicalDevice> device);
 
+        VmaAllocator get_vma_allocator()
+        {
+            return allocator;
+        }
+
+        vk::Device get_logical_device()
+        {
+            return logical_device;
+        }
+
+        vk::PhysicalDevice get_physical_device()
+        {
+            return physical_device;
+        }
+
     private:
         float queue_priority = 1.0f;
 
@@ -50,5 +68,6 @@ namespace gfx
         uint32_t evaluate_device(vk::PhysicalDevice physical_device, gfx::queue_family_indices indices);
 
         void cleanup();
+        void init_vma(const vk::Instance *instance);
     };
 }

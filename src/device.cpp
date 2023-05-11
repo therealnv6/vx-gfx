@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <validation.h>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -45,6 +46,8 @@ namespace gfx
         this->logical_device = physical_device.createDevice(device_create_info);
         this->graphics_queue = logical_device.getQueue(indices.graphics_family.value(), 0);
         this->present_queue = logical_device.getQueue(indices.present_family.value(), 0);
+
+        this->init_vma(instance);
     }
 
     device::~device()
@@ -158,5 +161,19 @@ namespace gfx
         }
 
         return evaluation++;
+    }
+
+    void device::init_vma(const vk::Instance *instance)
+    {
+        VmaAllocatorCreateInfo info = {};
+        info.instance = static_cast<VkInstance>(*instance);
+        info.physicalDevice = this->physical_device;
+        info.device = this->logical_device;
+        // info.flags |= VMA_ALLOCATOR_CREATE_KHR_DEDICATED_ALLOCATION_BIT | VMA_ALLOCATOR_CREATE_KHR_BIND_MEMORY2_BIT;
+
+        VmaAllocator allocator;
+        vmaCreateAllocator(&info, &allocator);
+
+        this->allocator = allocator;
     }
 }

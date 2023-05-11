@@ -1,40 +1,56 @@
 #pragma once
 
+#include <commands.h>
 #include <memory>
 #include <vector>
 #include <vertex.h>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
 
 namespace gfx
 {
     class device;
 
-    // A buffer that stores vertices for use in rendering.
-    template<typename T, uint32_t SIZE>
-    class vertex_buffer
+    template<typename T>
+    class buffer
     {
     public:
-        // Constructor. Takes a shared pointer to a device object and a vector of elements.
-        vertex_buffer(std::shared_ptr<gfx::device> device, const std::vector<T> &elements);
+        buffer(std::shared_ptr<gfx::device> device, const std::vector<T> &data, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties);
+        ~buffer();
 
-        // Destructor.
-        ~vertex_buffer();
-
-        // Returns the Vulkan buffer object associated with this vertex buffer.
         vk::Buffer get_buffer() const
         {
-            return this->buffer;
+            return this->vk_buffer;
         }
 
-        // Finds the memory type that can be used to allocate the buffer.
-        uint32_t find_memory_type(gfx::device &device, uint32_t type_filter, vk::MemoryPropertyFlags properties);
-
     private:
-        std::shared_ptr<gfx::device> device; // Shared pointer to the device object.
-        vk::Buffer buffer; // Vulkan buffer object.
-        vk::DeviceMemory memory; // Device memory for the buffer.
+        std::shared_ptr<gfx::device> device;
+        vk::Buffer vk_buffer;
+        vk::DeviceMemory memory;
+
+        uint32_t find_memory_type(vk::PhysicalDevice physical_device, uint32_t type_filter, vk::MemoryPropertyFlags properties);
     };
 
-    // Instantiate the vertex_buffer template with the vertex class and a size of 3.
-    template class gfx::vertex_buffer<gfx::vertex, 3u>;
+    template class buffer<gfx::vertex>;
+
+    template<typename T>
+    class vma_buffer
+    {
+    public:
+        vma_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const std::vector<T> &data, vk::BufferUsageFlags usage, VmaMemoryUsage vma_usage);
+        ~vma_buffer();
+
+        vk::Buffer get_buffer() const
+        {
+            return this->vk_buffer;
+        }
+
+    private:
+        std::shared_ptr<gfx::device> device;
+
+        vk::Buffer vk_buffer;
+        VmaAllocation allocation;
+    };
+
+    template class vma_buffer<gfx::vertex>;
 }

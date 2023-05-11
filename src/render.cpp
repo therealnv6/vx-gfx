@@ -25,17 +25,7 @@ namespace gfx
 
     void draw::begin()
     {
-        if (device->logical_device.waitForFences(commands->in_flight_fences[commands->current_frame], true, UINT64_MAX) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("unable to wait for fence in_flight_fence!");
-        }
-
-        device->logical_device.resetFences(commands->in_flight_fences[commands->current_frame]);
-
-        vk::CommandBuffer command_buffer = commands->command_buffers[commands->current_frame];
-
-        command_buffer.reset(); // reset command buffer
-        command_buffer.begin(vk::CommandBufferBeginInfo {});
+        commands->begin(commands->command_buffers[commands->current_frame]);
     }
 
     void draw::run(
@@ -51,6 +41,8 @@ namespace gfx
 
         spdlog::debug("just passed draw()");
 
+        // we can't use commands->wait_and_submit() here, because we also have to signal the semaphores!
+        // however, we don't always want to signal them, that's why the wait_and_submit() function doesn't do this.
         vk::Semaphore wait_semaphores[] = { commands->image_available_semaphores[commands->current_frame] };
         vk::Semaphore signal_semaphores[] = { commands->render_finished_semaphores[commands->current_frame] };
 
