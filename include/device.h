@@ -18,9 +18,6 @@ namespace gfx
     class device
     {
     public:
-        vk::Device logical_device;
-        vk::PhysicalDevice physical_device;
-
         vk::Queue graphics_queue;
         vk::Queue present_queue;
 
@@ -60,6 +57,10 @@ namespace gfx
 
     private:
         float queue_priority = 1.0f;
+
+        vk::Device logical_device;
+        vk::PhysicalDevice physical_device;
+
 
         std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> find_most_suitable(
             const std::vector<vk::PhysicalDevice> device,

@@ -41,10 +41,9 @@ namespace gfx
         void initialize();
 
         template<typename T>
-        void bind();
-
-        template<typename T>
         void bind_struct(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>);
+
+        void bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
 
         // This function cleans up the pipeline and releases any allocated resources.
         void cleanup();

@@ -46,14 +46,14 @@ namespace gfx
     void pipeline::cleanup()
     {
         spdlog::info("cleaning up gfx::pipeline");
-        device->logical_device.destroyPipeline(vk_pipeline);
+        device->get_logical_device().destroyPipeline(vk_pipeline);
         spdlog::info("... done!");
     }
 
     vk::ShaderModule pipeline::create_shader_module(const std::vector<char> &code)
     {
         vk::ShaderModuleCreateInfo create_info({}, code.size(), reinterpret_cast<const uint32_t *>(code.data()));
-        vk::ShaderModule module = device->logical_device.createShaderModule(create_info);
+        vk::ShaderModule module = device->get_logical_device().createShaderModule(create_info);
 
         return module;
     }
@@ -61,12 +61,6 @@ namespace gfx
     void pipeline::initialize()
     {
         this->create_graphics_pipeline();
-    }
-
-    template<typename T>
-    void pipeline::bind()
-    {
-        throw std::runtime_error("not supported!");
     }
 
     template<typename T>
@@ -78,6 +72,12 @@ namespace gfx
         {
             this->attribute_descriptions.push_back(attribute);
         }
+    }
+
+    void pipeline::bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets)
+    {
+        buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, this->vk_pipeline);
+        buffer->bindVertexBuffers(0, buffers, offsets);
     }
 
     template void pipeline::bind_struct<gfx::vertex>(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes);
@@ -190,7 +190,7 @@ namespace gfx
             nullptr,
             &colorBlending,
             &dynamic_state_info,
-            device->logical_device.createPipelineLayout(pipeline_layout_info),
+            device->get_logical_device().createPipelineLayout(pipeline_layout_info),
         };
 
         pipelineInfo.subpass = 0;
@@ -201,7 +201,7 @@ namespace gfx
         vk::Result result;
         vk::Pipeline pipeline;
 
-        std::tie(result, pipeline) = device->logical_device.createGraphicsPipeline(nullptr, pipelineInfo);
+        std::tie(result, pipeline) = device->get_logical_device().createGraphicsPipeline(nullptr, pipelineInfo);
 
         if (result != vk::Result::eSuccess)
         {
@@ -210,7 +210,7 @@ namespace gfx
 
         this->vk_pipeline = pipeline;
 
-        device->logical_device.destroyShaderModule(vertex_shader);
-        device->logical_device.destroyShaderModule(fragment_shader);
+        device->get_logical_device().destroyShaderModule(vertex_shader);
+        device->get_logical_device().destroyShaderModule(fragment_shader);
     }
 }

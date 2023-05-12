@@ -18,10 +18,10 @@ namespace gfx
 
         for (auto image_view : image_views)
         {
-            device->logical_device.destroyImageView(image_view);
+            device->get_logical_device().destroyImageView(image_view);
         }
 
-        device->logical_device.destroySwapchainKHR(chain);
+        device->get_logical_device().destroySwapchainKHR(chain);
 
         spdlog::info("... done!");
     }
@@ -37,7 +37,7 @@ namespace gfx
 
     void swapchain::initialize(GLFWwindow *window, vk::SurfaceKHR &surface)
     {
-        gfx::swapchain_support_details details = gfx::query_swapchain_support(device->physical_device, surface);
+        gfx::swapchain_support_details details = gfx::query_swapchain_support(device->get_physical_device(), surface);
 
         this->extent = this->choose_swap_extent(details.capabilities, window);
         this->create_swapchain(surface, details);
@@ -57,7 +57,7 @@ namespace gfx
         uint32_t image_count = std::max(details.capabilities.minImageCount + 1, details.capabilities.maxImageCount);
 
         vk::SwapchainCreateInfoKHR create_info({}, surface, image_count, surface_format.format, surface_format.colorSpace, extent, 1, image_usage);
-        gfx::queue_family_indices indices = device->find_queue_families(&surface, device->physical_device);
+        gfx::queue_family_indices indices = device->find_queue_families(&surface, device->get_physical_device());
 
         uint32_t queue_family_indices[] = {
             indices.graphics_family.value(),
@@ -80,8 +80,8 @@ namespace gfx
         create_info.setPresentMode(present_mode);
         create_info.setClipped(true);
 
-        this->chain = device->logical_device.createSwapchainKHR(create_info);
-        this->images = device->logical_device.getSwapchainImagesKHR(chain);
+        this->chain = device->get_logical_device().createSwapchainKHR(create_info);
+        this->images = device->get_logical_device().getSwapchainImagesKHR(chain);
     }
 
     void swapchain::create_image_views()
@@ -113,7 +113,7 @@ namespace gfx
                 compmonent_mapping,
                 subsource_range);
 
-            image_views[i] = device->logical_device.createImageView(create_info);
+            image_views[i] = device->get_logical_device().createImageView(create_info);
         }
     }
 
@@ -197,10 +197,10 @@ namespace gfx
         spdlog::info("cleaning up gfx::render_pass");
         for (auto framebuffer : framebuffers)
         {
-            device->logical_device.destroyFramebuffer(framebuffer);
+            device->get_logical_device().destroyFramebuffer(framebuffer);
         }
 
-        device->logical_device.destroyRenderPass(pass);
+        device->get_logical_device().destroyRenderPass(pass);
         spdlog::info("... done!");
     }
 
@@ -238,7 +238,7 @@ namespace gfx
 
         vk::RenderPassCreateInfo info({}, 1, &color_attachment, 1, &subpass, 1, &dependency);
 
-        this->pass = device->logical_device.createRenderPass(info);
+        this->pass = device->get_logical_device().createRenderPass(info);
     }
 
     void render_pass::create_frame_buffers()
@@ -261,7 +261,7 @@ namespace gfx
                 1
             };
 
-            this->framebuffers[i] = device->logical_device.createFramebuffer(create_info);
+            this->framebuffers[i] = device->get_logical_device().createFramebuffer(create_info);
         }
     }
 }

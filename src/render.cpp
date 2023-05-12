@@ -31,7 +31,7 @@ namespace gfx
     void draw::run(
         std::function<void(vk::CommandBuffer *buffer, uint32_t image_index)> draw)
     {
-        vk::ResultValue<uint32_t> image_index = device->logical_device.acquireNextImageKHR(
+        vk::ResultValue<uint32_t> image_index = device->get_logical_device().acquireNextImageKHR(
             swapchain->chain,
             UINT64_MAX,
             commands->image_available_semaphores[commands->current_frame]);

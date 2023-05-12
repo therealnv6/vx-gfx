@@ -23,23 +23,23 @@ namespace gfx
     void commands::cleanup()
     {
         spdlog::info("cleaning up gfx::commands");
-        device->logical_device.destroyCommandPool(this->command_pool);
+        device->get_logical_device().destroyCommandPool(this->command_pool);
         spdlog::info("... done!");
     }
 
     void commands::create_command_pool()
     {
-        gfx::queue_family_indices indices = device->find_queue_families(this->surface, device->physical_device);
+        gfx::queue_family_indices indices = device->find_queue_families(this->surface, device->get_physical_device());
         vk::CommandPoolCreateInfo pool_info {
             vk::CommandPoolCreateFlagBits::eResetCommandBuffer, indices.graphics_family.value()
         };
 
-        this->command_pool = device->logical_device.createCommandPool(pool_info);
+        this->command_pool = device->get_logical_device().createCommandPool(pool_info);
     }
 
     void commands::initialize_command_buffers()
     {
-        this->command_buffers = device->logical_device.allocateCommandBuffers(
+        this->command_buffers = device->get_logical_device().allocateCommandBuffers(
             vk::CommandBufferAllocateInfo(
                 this->command_pool,
                 vk::CommandBufferLevel::ePrimary,
@@ -53,15 +53,15 @@ namespace gfx
 
         for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            this->image_available_semaphores.push_back(device->logical_device.createSemaphore(semaphore_info));
-            this->render_finished_semaphores.push_back(device->logical_device.createSemaphore(semaphore_info));
-            this->in_flight_fences.push_back(device->logical_device.createFence(fence_info));
+            this->image_available_semaphores.push_back(device->get_logical_device().createSemaphore(semaphore_info));
+            this->render_finished_semaphores.push_back(device->get_logical_device().createSemaphore(semaphore_info));
+            this->in_flight_fences.push_back(device->get_logical_device().createFence(fence_info));
         }
     }
 
     vk::CommandBuffer commands::start_small_buffer()
     {
-        return device->logical_device.allocateCommandBuffers(
+        return device->get_logical_device().allocateCommandBuffers(
             vk::CommandBufferAllocateInfo(
                 this->command_pool,
                 vk::CommandBufferLevel::ePrimary,
@@ -70,12 +70,12 @@ namespace gfx
 
     void commands::begin(const vk::CommandBuffer &command_buffer)
     {
-        if (device->logical_device.waitForFences(in_flight_fences[current_frame], true, UINT64_MAX) != vk::Result::eSuccess)
+        if (device->get_logical_device().waitForFences(in_flight_fences[current_frame], true, UINT64_MAX) != vk::Result::eSuccess)
         {
             throw std::runtime_error("unable to wait for fence in_flight_fence!");
         }
 
-        device->logical_device.resetFences(in_flight_fences[current_frame]);
+        device->get_logical_device().resetFences(in_flight_fences[current_frame]);
 
         command_buffer.reset(); // reset command buffer
         command_buffer.begin(vk::CommandBufferBeginInfo {});

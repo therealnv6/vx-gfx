@@ -21,7 +21,7 @@ const std::vector<gfx::vertex> vertices = {
 };
 
 // initialize graphics context, device and swapchain
-// this is just a simple testing environment/playground for me, this is not 
+// this is just a simple testing environment/playground for me, this is not
 // supposed to be used as a part of the library.
 int main()
 {
@@ -100,20 +100,19 @@ int main()
             drawer.begin();
 
             // run commands within the draw object
-            drawer.run([&](vk::CommandBuffer *buffer, auto index) {                
+            drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
-                buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.vk_pipeline);
-                buffer->bindVertexBuffers(0, vertex_buffer.get_buffer(), { 0 });
+                pipeline.bind(buffer, { vertex_buffer.get_buffer() });
                 buffer->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
                 render_pass.end(buffer);
             });
 
             // poll for events
             glfwPollEvents();
-
-            // wait for device to finish rendering
-            device->logical_device.waitIdle();
         }
+
+        // wait for device to finish rendering
+        device->get_logical_device().waitIdle();
     } catch (std::exception &e)
     {
         spdlog::error("unable to instantiate vuxol, {}", e.what());
