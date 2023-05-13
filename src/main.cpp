@@ -15,9 +15,14 @@
 #include <vulkan/vulkan_enums.hpp>
 
 const std::vector<gfx::vertex> vertices = {
-    {{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
-    { { 0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f }},
-    {{ -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }}
+    {{ -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
+    { { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }},
+    {  { 0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }},
+    { { -0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f }}
+};
+
+const std::vector<uint16_t> indices = {
+    0, 1, 2, 2, 3, 0
 };
 
 // initialize graphics context, device and swapchain
@@ -64,11 +69,12 @@ int main()
             "build/triangle.frag.spv",
         };
 
-        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::CpuToGpu);
+        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
+        gfx::vma_index_buffer<uint16_t> index_buffer(device, commands, indices, vma::memory_usage::GpuOnly, vk::IndexType::eUint16);
 
         // bind vertex buffer and attribute descriptions
         // clang-format off
-        pipeline.bind_struct<gfx::vertex>(
+        pipeline.bind_vertex_buffer<gfx::vertex>(
             gfx::vertex::get_binding_description(),
             gfx::vertex::get_attribute_descriptions()
         );
@@ -102,8 +108,10 @@ int main()
             // run commands within the draw object
             drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
-                pipeline.bind(buffer, { vertex_buffer.get_buffer() });
-                buffer->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+                pipeline.bind<uint16_t>(buffer,
+                    { vertex_buffer.get_buffer() },
+                    { index_buffer });
+                buffer->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
                 render_pass.end(buffer);
             });
 

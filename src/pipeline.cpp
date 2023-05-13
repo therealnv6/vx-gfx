@@ -1,3 +1,4 @@
+#include "buffer.h"
 #include "swapchain.h"
 #include "vertex.h"
 #include <fstream>
@@ -64,7 +65,7 @@ namespace gfx
     }
 
     template<typename T>
-    void pipeline::bind_struct(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes)
+    void pipeline::bind_vertex_buffer(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes)
     {
         this->binding_descriptions.push_back(binding);
 
@@ -74,13 +75,22 @@ namespace gfx
         }
     }
 
-    void pipeline::bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets)
+    template<typename T>
+    void pipeline::bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::vma_index_buffer<T>>> index_buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets)
     {
         buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, this->vk_pipeline);
         buffer->bindVertexBuffers(0, buffers, offsets);
+
+        for (gfx::vma_index_buffer<T> // we have to keep this as this type, not as auto. this will implicitly cast it from a std::reference_wrapper<T> to T itself.
+                 &index_buffer : index_buffers)
+        {
+            buffer->bindIndexBuffer(index_buffer.get_buffer(), 0, index_buffer.get_index_type());
+        }
     }
 
-    template void pipeline::bind_struct<gfx::vertex>(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes);
+    template void pipeline::bind<uint32_t>(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::vma_index_buffer<uint32_t>>> index_buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets);
+    template void pipeline::bind<uint16_t>(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::vma_index_buffer<uint16_t>>> index_buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets);
+    template void pipeline::bind_vertex_buffer<gfx::vertex>(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes);
 
     void pipeline::create_graphics_pipeline()
     {

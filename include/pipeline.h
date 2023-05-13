@@ -1,5 +1,6 @@
 #pragma once
 #include "swapchain.h"
+#include <buffer.h>
 #include <device.h>
 #include <string>
 #include <vector>
@@ -41,9 +42,10 @@ namespace gfx
         void initialize();
 
         template<typename T>
-        void bind_struct(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>);
+        void bind_vertex_buffer(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>);
 
-        void bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
+        template<typename T>
+        void bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::vma_index_buffer<T>>> index_buffers = {}, vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
 
         // This function cleans up the pipeline and releases any allocated resources.
         void cleanup();
