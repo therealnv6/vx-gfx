@@ -15,18 +15,29 @@ find_package(spdlog REQUIRED)
 add_subdirectory(thirdparty/glfw)
 add_subdirectory(thirdparty/vma)
 
-file(GLOB SOURCES 
-    "src/*.cpp"
-    "src/*.h" 
-    "include/*.h"
+find_program(MOLD_LINKER_EXE mold)
+
+if(MOLD_LINKER_EXE)
+    # If mold is found, set the linker flags to use it
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=mold")
+else()
+    # If mold is not found, print a warning message and use the default linker
+    message(WARNING "mold linker not found on this system. Using default linker instead.")
+endif()
+file(GLOB_RECURSE SOURCES 
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/*.h
+    ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include
     ${CMAKE_CURRENT_BINARY_DIR}
-    # "thirdparty/Vulkan-Headers/include/"
     "thirdparty/glfw/include/"
     "thirdparty/vma/include"
 )

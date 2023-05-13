@@ -1,8 +1,9 @@
 #pragma once
-#include "swapchain.h"
-#include <buffer.h>
+#include <buffer/buffer.h>
+#include <buffer/index.h>
 #include <device.h>
 #include <string>
+#include <swapchain/swapchain.h>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -45,7 +46,7 @@ namespace gfx
         void bind_vertex_buffer(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>);
 
         template<typename T>
-        void bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::vma_index_buffer<T>>> index_buffers = {}, vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
+        void bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::index_buffer<T>>> index_buffers = {}, vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
 
         // This function cleans up the pipeline and releases any allocated resources.
         void cleanup();

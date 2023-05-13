@@ -7,7 +7,7 @@
 
 #include <commands.h>
 #include <device.h>
-#include <swapchain.h>
+#include <swapchain/swapchain.h>
 
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
@@ -20,8 +20,8 @@ namespace gfx
      * It manages device, surface, synchronization, and swapchain creation.
      *
      * @see [render_pass.h->gfx->render_pass] - Render pass header file.
-     * @see [pipeline.h->gfx->pipeline] - Pipeline header file.
-     * @see [swapchain.h->gfx->swapchain] - Swapchain header file.
+     * @see [swapchain/pipeline.h->gfx->pipeline] - Pipeline header file.
+     * @see [swapchain/swapchain.h->gfx->swapchain] - Swapchain header file.
      * @see [device.h->gfx->device] - Device header file.
      *      This class handles all device initialization.
      *      The main reason to keep this separate from the gfx::context class is to

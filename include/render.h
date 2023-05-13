@@ -5,8 +5,8 @@
 #include <device.h>
 #include <functional>
 #include <global.h>
-#include <pipeline.h>
-#include <swapchain.h>
+#include <swapchain/pipeline.h>
+#include <swapchain/swapchain.h>
 
 namespace gfx
 {

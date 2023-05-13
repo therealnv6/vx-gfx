@@ -1,18 +1,23 @@
 #define VMA_IMPLEMENTATION
 #define VMA_VULKAN_VERSION 1003000
 #define VMA_DEBUG_REPORT 1
-#include "vk_mem_alloc.h"
 #include <GLFW/glfw3.h>
-#include <buffer.h>
+#include <buffer/buffer.h>
+#include <buffer/index.h>
 #include <context.h>
 #include <device.h>
 #include <memory>
 #include <render.h>
 #include <spdlog/spdlog.h>
-#include <swapchain.h>
+#include <swapchain/swapchain.h>
 #include <util.h>
 #include <vertex.h>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan_enums.hpp>
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 const std::vector<gfx::vertex> vertices = {
     {{ -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
@@ -24,6 +29,15 @@ const std::vector<gfx::vertex> vertices = {
 const std::vector<uint16_t> indices = {
     0, 1, 2, 2, 3, 0
 };
+
+struct uniform_buffer_object {
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
+// if you're using an object that is not yet registered as a template within gfx::vma_buffer, you can do it like so:
+// extern template class gfx::vma_buffer<gfx::vertex>;
 
 // initialize graphics context, device and swapchain
 // this is just a simple testing environment/playground for me, this is not
@@ -69,8 +83,11 @@ int main()
             "build/triangle.frag.spv",
         };
 
-        gfx::vma_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
-        gfx::vma_index_buffer<uint16_t> index_buffer(device, commands, indices, vma::memory_usage::GpuOnly, vk::IndexType::eUint16);
+        gfx::buffer<const gfx::vertex *> vertex_buffer(device, commands, vertices.data(), sizeof(gfx::vertex) * vertices.size(), vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
+
+        // doesn't work for some reason. have to investigate this
+        // gfx::vec_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
+        gfx::index_buffer<const uint16_t *> index_buffer(device, commands, indices.data(), sizeof(uint16_t) * indices.size(), vma::memory_usage::GpuOnly, vk::IndexType::eUint16);
 
         // bind vertex buffer and attribute descriptions
         // clang-format off
@@ -85,6 +102,14 @@ int main()
 
         uint32_t frame_time = 0.0;
         double last_time = glfwGetTime();
+
+        uniform_buffer_object object {
+            glm::rotate(glm::mat4(1.0f), static_cast<float>(last_time) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+            glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+            glm::perspective(glm::radians(45.0f), swapchain->extent.width / (float) swapchain->extent.height, 0.1f, 10.0f)
+        };
+
+        object.proj[1][1] *= -1;
 
         // create vertex buffer object
         // render loop
@@ -108,7 +133,7 @@ int main()
             // run commands within the draw object
             drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
-                pipeline.bind<uint16_t>(buffer,
+                pipeline.bind<const uint16_t *>(buffer,
                     { vertex_buffer.get_buffer() },
                     { index_buffer });
                 buffer->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);

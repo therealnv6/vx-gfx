@@ -1,17 +1,17 @@
-#include "util.h"
-#include <buffer.h>
+#include <X11/Xresource.h>
+#include <buffer/buffer.h>
 #include <device.h>
+#include <stdexcept>
+#include <util.h>
 #include <vertex.h>
 #include <vulkan/vulkan_core.h>
 
 namespace gfx
 {
     template<typename T>
-    vma_buffer<T>::vma_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const std::vector<T> &data, vk::BufferUsageFlags usage, vma::memory_usage memory_usage)
+    buffer<T>::buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const T &data, size_t size, vk::BufferUsageFlags usage, vma::memory_usage memory_usage)
         : device(device)
     {
-        auto size = sizeof(T) * data.size();
-
         VkBuffer staging_buffer;
         VmaAllocation staging_allocation;
 
@@ -31,7 +31,7 @@ namespace gfx
 
             void *staging_data;
             vmaMapMemory(device->get_vma_allocator(), staging_allocation, &staging_data);
-            memcpy(staging_data, data.data(), size);
+            memcpy(staging_data, data, size);
             vmaUnmapMemory(device->get_vma_allocator(), staging_allocation);
         }
 
@@ -68,7 +68,7 @@ namespace gfx
     }
 
     template<typename T>
-    vma_buffer<T>::~vma_buffer()
+    buffer<T>::~buffer()
     {
         vmaDestroyBuffer(device->get_vma_allocator(), this->vk_buffer, this->allocation);
     }
