@@ -87,6 +87,8 @@ int main()
         gfx::uniform_buffer<gfx::uniform_buffer_object> uniform_buffer(device, commands, object, sizeof(gfx::uniform_buffer_object), vma::memory_usage::GpuOnly);
 
         auto pool = std::make_shared<gfx::descriptor_pool>(device, vk::DescriptorType::eUniformBuffer);
+
+        // clang-format off
         gfx::uniform_layout layout {
             device,
             {
@@ -101,10 +103,9 @@ int main()
               0,
               }
         };
-        gfx::descriptor_set<gfx::uniform_buffer_object> descriptor_set { pool, layout, uniform_buffer };
-        // clang-format off
 
         // clang-format on
+        gfx::descriptor_set<gfx::uniform_buffer_object> descriptor_set { pool, layout, uniform_buffer };
 
         // bind vertex buffer and attribute descriptions
         // clang-format off
@@ -155,7 +156,7 @@ int main()
                 pipeline.bind<const uint16_t *>(buffer,
                     { vertex_buffer.get_buffer() },
                     { index_buffer },
-                    { descriptor_set.sets[index] });
+                    { descriptor_set.sets[0] });
                 buffer->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
                 render_pass.end(buffer);
             });

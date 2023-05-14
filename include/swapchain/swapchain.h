@@ -96,7 +96,7 @@ namespace gfx
      * @param final_layout - The final layout of the attachment.
      * @return A new render_pass object with the specified configuration.
      */
-    render_pass start_render_pass(std::shared_ptr<gfx::swapchain> swapchain, 
+    render_pass start_render_pass(std::shared_ptr<gfx::swapchain> swapchain,
         vk::SampleCountFlags samples = vk::SampleCountFlagBits::e1,
         vk::AttachmentStoreOp store_operation = vk::AttachmentStoreOp::eStore,
         vk::AttachmentLoadOp load_operation = vk::AttachmentLoadOp::eClear,

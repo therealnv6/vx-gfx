@@ -213,7 +213,7 @@ namespace gfx
         );
 
         vk::PipelineLayoutCreateInfo pipeline_layout_info {
-            {},
+            vk::PipelineLayoutCreateFlagBits::eIndependentSetsEXT,
             static_cast<uint32_t>(layouts.size()),
             this->layouts.data(),
         };

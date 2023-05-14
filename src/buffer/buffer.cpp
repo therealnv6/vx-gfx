@@ -2,12 +2,14 @@
 #include <buffer/buffer.h>
 #include <device.h>
 #include <stdexcept>
+#include <type_traits>
 #include <util.h>
 #include <vertex.h>
 #include <vulkan/vulkan_core.h>
 
 namespace gfx
 {
+
     template<class T>
     buffer<T>::buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const T &data, size_t size, vk::BufferUsageFlags usage, vma::memory_usage memory_usage)
         : device(device)
@@ -32,7 +34,16 @@ namespace gfx
 
             void *staging_data;
             vmaMapMemory(device->get_vma_allocator(), staging_allocation, &staging_data);
-            memcpy(staging_data, data, size);
+            
+            if constexpr (std::is_const_v<T> || std::is_pointer_v<T>)
+            {
+                memcpy(staging_data, static_cast<const void *>(data), size);
+            }
+            else
+            {
+                memcpy(staging_data, reinterpret_cast<const void *>(&data), size);
+            }
+
             vmaUnmapMemory(device->get_vma_allocator(), staging_allocation);
         }
 

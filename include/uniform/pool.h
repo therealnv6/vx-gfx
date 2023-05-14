@@ -14,6 +14,7 @@ namespace gfx
     public:
         descriptor_pool(std::shared_ptr<gfx::device> device, vk::DescriptorType type)
             : type { type }
+            , device { device }
         {
             this->create_pool();
         };
@@ -25,6 +26,7 @@ namespace gfx
 
         std::vector<vk::DescriptorSet> create_descriptor_sets(gfx::uniform_layout layout)
         {
+            spdlog::info("create descriptor sets");
             std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, layout.layout);
             std::vector<vk::DescriptorSet> sets(MAX_FRAMES_IN_FLIGHT);
 
@@ -41,6 +43,7 @@ namespace gfx
                 throw std::runtime_error("error while allocating descriptor sets!");
             }
 
+            spdlog::info("created {}...", sets.size());
             return sets;
         }
         

@@ -42,19 +42,26 @@ namespace validation
 
         if (severity == severity_flags::eError)
         {
-            spdlog::error("validation layer: {}", pCallbackData->pMessage);
+            static int a = 0;
+            if (a > 4)
+            {
+                throw std::runtime_error("meow");
+            }
+            a++;
+            spdlog::error(pCallbackData->pMessage);
+
         }
         else if (severity == severity_flags::eInfo)
         {
-            spdlog::info("validation layer: {}", pCallbackData->pMessage);
+            spdlog::info(pCallbackData->pMessage);
         }
         else if (severity == severity_flags::eWarning)
         {
-            spdlog::warn("validation layer: {}", pCallbackData->pMessage);
+            spdlog::warn(pCallbackData->pMessage);
         }
         else if (severity == severity_flags::eVerbose)
         {
-            spdlog::debug("validation layer: {}", pCallbackData->pMessage);
+            spdlog::debug(pCallbackData->pMessage);
         }
 
         return VK_FALSE;

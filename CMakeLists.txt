@@ -26,6 +26,7 @@ else()
     # If mold is not found, print a warning message and use the default linker
     message(WARNING "mold linker not found on this system. Using default linker instead.")
 endif()
+
 file(GLOB_RECURSE SOURCES 
     ${PROJECT_SOURCE_DIR}/src/*.cpp
     ${PROJECT_SOURCE_DIR}/src/*.h

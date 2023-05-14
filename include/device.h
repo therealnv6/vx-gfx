@@ -1,8 +1,8 @@
 #pragma once
-#include <vk_mem_alloc.h>
 #include <functional>
 #include <global.h>
 #include <optional>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 
@@ -13,6 +13,7 @@ namespace gfx
         VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME,
         VK_KHR_MAINTENANCE2_EXTENSION_NAME,
         VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
+        // VK_EXT_GRAPHICS_PIPELINE_LIBRARY_EXTENSION_NAME,
     };
 
     class device
@@ -60,7 +61,6 @@ namespace gfx
 
         vk::Device logical_device;
         vk::PhysicalDevice physical_device;
-
 
         std::optional<std::pair<vk::PhysicalDevice, gfx::queue_family_indices>> find_most_suitable(
             const std::vector<vk::PhysicalDevice> device,
