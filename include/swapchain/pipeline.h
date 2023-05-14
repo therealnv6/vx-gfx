@@ -1,4 +1,5 @@
 #pragma once
+#include "uniform/layout.h"
 #include <buffer/buffer.h>
 #include <buffer/index.h>
 #include <device.h>
@@ -18,6 +19,8 @@ namespace gfx
     {
     public:
         vk::Pipeline vk_pipeline; // The Vulkan pipeline handle.
+        vk::PipelineLayout pipeline_layout;
+
         std::shared_ptr<gfx::render_pass> pass;
 
         std::vector<vk::DynamicState> dynamic_states = {
@@ -27,6 +30,7 @@ namespace gfx
 
         std::vector<vk::VertexInputBindingDescription> binding_descriptions;
         std::vector<vk::VertexInputAttributeDescription> attribute_descriptions;
+        std::vector<vk::DescriptorSetLayout> layouts;
 
         // The constructor for the pipeline class.
         pipeline(std::shared_ptr<gfx::swapchain> swapchain,
@@ -42,11 +46,17 @@ namespace gfx
 
         void initialize();
 
-        template<typename T>
+        void bind_uniform_layout(gfx::uniform_layout layout);
+
+        template<class T>
         void bind_vertex_buffer(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>);
 
-        template<typename T>
-        void bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::index_buffer<T>>> index_buffers = {}, vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
+        template<class T>
+        void bind(vk::CommandBuffer *buffer,
+            vk::ArrayProxy<vk::Buffer> buffers = {},
+            vk::ArrayProxy<std::reference_wrapper<gfx::index_buffer<T>>> index_buffers = {},
+            vk::ArrayProxy<vk::DescriptorSet> descriptor_sets = {},
+            vk::ArrayProxy<const vk::DeviceSize> const &offsets = { 0 });
 
         // This function cleans up the pipeline and releases any allocated resources.
         void cleanup();

@@ -12,10 +12,12 @@ namespace gfx
 {
     class device;
 
-    template<typename T>
+    template<class T>
     class buffer
     {
     public:
+        size_t size;
+
         buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const T &data, size_t size, vk::BufferUsageFlags usage, vma::memory_usage memory_usage);
         ~buffer();
 
@@ -26,8 +28,8 @@ namespace gfx
 
     private:
         std::shared_ptr<gfx::device> device;
-
         vk::Buffer vk_buffer;
+
         VmaAllocation allocation;
     };
 
@@ -36,7 +38,16 @@ namespace gfx
     template class buffer<const uint16_t *>;
     template class buffer<const uint32_t *>;
 
-    template<typename T>
+    struct uniform_buffer_object {
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 proj;
+    };
+
+    // if you're using an object that is not yet registered as a template within any of the gfx::_buffer objects, you can do it like so:
+    template class gfx::buffer<uniform_buffer_object>;
+
+    template<class T>
     class vec_buffer : public buffer<const T *>
     {
     public:

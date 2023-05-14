@@ -64,7 +64,12 @@ namespace gfx
         this->create_graphics_pipeline();
     }
 
-    template<typename T>
+    void pipeline::bind_uniform_layout(gfx::uniform_layout layout)
+    {
+        this->layouts.push_back(layout.layout);
+    }
+
+    template<class T>
     void pipeline::bind_vertex_buffer(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes)
     {
         this->binding_descriptions.push_back(binding);
@@ -75,21 +80,42 @@ namespace gfx
         }
     }
 
-    template<typename T>
-    void pipeline::bind(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::index_buffer<T>>> index_buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets)
+    template<class T>
+    void pipeline::bind(vk::CommandBuffer *buffer,
+        vk::ArrayProxy<vk::Buffer> buffers,
+        vk::ArrayProxy<std::reference_wrapper<gfx::index_buffer<T>>> index_buffers,
+        vk::ArrayProxy<vk::DescriptorSet> descriptor_sets,
+        vk::ArrayProxy<const vk::DeviceSize> const &offsets)
     {
+        if (!this->attribute_descriptions.empty() && buffers.empty())
+        {
+            spdlog::warn("pipeline::bind() was called without buffers, however attribute descriptions are present. did you forget to provide your buffers?");
+        }
+
         buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, this->vk_pipeline);
-        buffer->bindVertexBuffers(0, buffers, offsets);
+
+        if (!buffers.empty())
+        {
+            buffer->bindVertexBuffers(0, buffers, offsets);
+        }
 
         for (gfx::index_buffer<T> // we have to keep this as this type, not as auto. this will implicitly cast it from a std::reference_wrapper<T> to T itself.
                  &index_buffer : index_buffers)
         {
             buffer->bindIndexBuffer(index_buffer.get_buffer(), 0, index_buffer.get_index_type());
         }
+
+        buffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+            pipeline_layout,
+            0,
+            static_cast<uint32_t>(descriptor_sets.size()),
+            descriptor_sets.data(),
+            0,
+            nullptr);
     }
 
-    template void pipeline::bind<const uint32_t *>(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::index_buffer<const uint32_t *>>> index_buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets);
-    template void pipeline::bind<const uint16_t *>(vk::CommandBuffer *buffer, std::vector<vk::Buffer> buffers, std::vector<std::reference_wrapper<gfx::index_buffer<const uint16_t *>>> index_buffers, vk::ArrayProxy<const vk::DeviceSize> const &offsets);
+    template void pipeline::bind<const uint32_t *>(vk::CommandBuffer *buffer, vk::ArrayProxy<vk::Buffer> buffers, vk::ArrayProxy<std::reference_wrapper<gfx::index_buffer<const uint32_t *>>> index_buffers, vk::ArrayProxy<vk::DescriptorSet> descriptor_sets, vk::ArrayProxy<const vk::DeviceSize> const &offsets);
+    template void pipeline::bind<const uint16_t *>(vk::CommandBuffer *buffer, vk::ArrayProxy<vk::Buffer> buffers, vk::ArrayProxy<std::reference_wrapper<gfx::index_buffer<const uint16_t *>>> index_buffers, vk::ArrayProxy<vk::DescriptorSet> descriptor_sets, vk::ArrayProxy<const vk::DeviceSize> const &offsets);
     template void pipeline::bind_vertex_buffer<gfx::vertex>(vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription> attributes);
 
     void pipeline::create_graphics_pipeline()
@@ -186,7 +212,14 @@ namespace gfx
             { 0.0f, 0.0f, 0.0f, 0.0f } // blendConstants (optional)
         );
 
-        vk::PipelineLayoutCreateInfo pipeline_layout_info;
+        vk::PipelineLayoutCreateInfo pipeline_layout_info {
+            {},
+            static_cast<uint32_t>(layouts.size()),
+            this->layouts.data(),
+        };
+
+        this->pipeline_layout = device->get_logical_device().createPipelineLayout(pipeline_layout_info);
+
         vk::GraphicsPipelineCreateInfo pipelineInfo {
             {},
             sizeof(shader_stages) / sizeof(vk::PipelineShaderStageCreateInfo),
@@ -200,7 +233,7 @@ namespace gfx
             nullptr,
             &colorBlending,
             &dynamic_state_info,
-            device->get_logical_device().createPipelineLayout(pipeline_layout_info),
+            pipeline_layout,
         };
 
         pipelineInfo.subpass = 0;

@@ -8,9 +8,10 @@
 
 namespace gfx
 {
-    template<typename T>
+    template<class T>
     buffer<T>::buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const T &data, size_t size, vk::BufferUsageFlags usage, vma::memory_usage memory_usage)
         : device(device)
+        , size(size)
     {
         VkBuffer staging_buffer;
         VmaAllocation staging_allocation;
@@ -67,7 +68,7 @@ namespace gfx
         vmaDestroyBuffer(device->get_vma_allocator(), staging_buffer, staging_allocation);
     }
 
-    template<typename T>
+    template<class T>
     buffer<T>::~buffer()
     {
         vmaDestroyBuffer(device->get_vma_allocator(), this->vk_buffer, this->allocation);

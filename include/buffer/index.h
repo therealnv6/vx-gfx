@@ -3,7 +3,7 @@
 
 namespace gfx
 {
-    template<typename T>
+    template<class T>
     class index_buffer : public buffer<T>
     {
     public:
