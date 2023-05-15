@@ -2,6 +2,7 @@
 #include <buffer/uniform.h>
 #include <config.h>
 #include <device.h>
+#include <stdexcept>
 #include <uniform/layout.h>
 #include <uniform/pool.h>
 #include <vulkan/vulkan.hpp>
@@ -28,10 +29,7 @@ namespace gfx
 
         void update_descriptor_sets()
         {
-            std::vector<vk::WriteDescriptorSet> descriptor_writes;
-            descriptor_writes.reserve(uniform_buffer.buffers.size());
-
-            for (uint32_t i = 0; i < uniform_buffer.buffers.size(); ++i)
+            for (uint32_t i = 0; i < uniform_buffer.buffers.size(); i++)
             {
                 auto buffer = uniform_buffer.get_buffer(i);
 
@@ -46,14 +44,8 @@ namespace gfx
                     &buffer_info
                 };
 
-                descriptor_writes.push_back(write_descriptor_set);
+                device->get_logical_device().updateDescriptorSets(1, &write_descriptor_set, 0, nullptr);
             }
-
-            device->get_logical_device().updateDescriptorSets(
-                static_cast<uint32_t>(descriptor_writes.size()),
-                descriptor_writes.data(),
-                0,
-                nullptr);
         }
     };
 }

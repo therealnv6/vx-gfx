@@ -42,14 +42,7 @@ namespace validation
 
         if (severity == severity_flags::eError)
         {
-            static int a = 0;
-            if (a > 4)
-            {
-                throw std::runtime_error("meow");
-            }
-            a++;
             spdlog::error(pCallbackData->pMessage);
-
         }
         else if (severity == severity_flags::eInfo)
         {

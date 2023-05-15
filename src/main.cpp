@@ -165,6 +165,7 @@ int main()
                     { vertex_buffer.get_buffer() },
                     { index_buffer },
                     { descriptor_set.sets[commands->current_frame] });
+                    
                 buffer->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
                 render_pass.end(buffer);
             });

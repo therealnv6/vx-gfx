@@ -73,13 +73,14 @@ namespace gfx
         }
         else
         {
-            VmaAllocationCreateInfo device_alloc_info = { 0, vma::to_vma_memory_usage(memory_usage), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT };
 
             // Create multiple device buffers, one for each frame in flight.
-            for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+            for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
             {
                 VkBuffer buffer;
                 VmaAllocation allocation;
+                VmaAllocationCreateInfo device_alloc_info = { 0, vma::to_vma_memory_usage(memory_usage), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT };
+
                 void *mapped_data = malloc(size);
 
                 vmaCreateBuffer(device->get_vma_allocator(),
@@ -93,8 +94,9 @@ namespace gfx
                 vmaMapMemory(device->get_vma_allocator(), allocation, &mapped_data);
 
                 this->allocations.push_back(allocation);
-                this->buffers.push_back(buffer);
+                this->buffers.emplace_back(buffer);
                 this->data_mapped.push_back(mapped_data);
+                spdlog::info("buffers: MFIF={}, buffers.size()={}, index={}, T={}", MAX_FRAMES_IN_FLIGHT, buffers.size(), i, typeid(T).name());
             }
         }
 
