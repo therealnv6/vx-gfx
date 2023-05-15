@@ -8,7 +8,7 @@ namespace gfx
     {
     public:
         index_buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const T &data, size_t size, vma::memory_usage memory_usage, vk::IndexType type)
-            : buffer<T>(device, commands, data, size, vk::BufferUsageFlagBits::eIndexBuffer, memory_usage)
+            : buffer<T>(device, commands, data, size, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, memory_usage)
             , type { type }
         {
         }

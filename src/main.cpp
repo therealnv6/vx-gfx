@@ -33,7 +33,6 @@ const std::vector<uint16_t> indices = {
     0, 1, 2, 2, 3, 0
 };
 
-
 // initialize graphics context, device and swapchain
 // this is just a simple testing environment/playground for me, this is not
 // supposed to be used as a part of the library.
@@ -141,22 +140,23 @@ int main()
                 last_time = current_time;
             }
 
-            object = gfx::uniform_buffer_object {
-                glm::rotate(glm::mat4(1.0f), static_cast<float>(last_time) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-                glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-                glm::perspective(glm::radians(45.0f), swapchain->extent.width / (float) swapchain->extent.height, 0.1f, 10.0f)
-            };
-
-            object.proj[1][1] *= -1;
-
             // begin drawing commands
             drawer.begin();
 
             // run commands within the draw object
             drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 // this is just here temporarily, don't worry!
+                static int a = 0;
                 if (uniform_buffer.get_mapped_data(commands->current_frame) != nullptr)
                 {
+                    object = gfx::uniform_buffer_object {
+                        glm::rotate(glm::mat4(1.0f), static_cast<float>(last_time) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+                        glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+                        glm::perspective(glm::radians(45.0f), swapchain->extent.width / (float) swapchain->extent.height, 0.1f, 10.0f)
+                    };
+
+                    object.proj[1][1] *= -1;
+
                     memcpy(uniform_buffer.get_mapped_data(commands->current_frame), &object, sizeof(object));
                 }
 
@@ -165,7 +165,7 @@ int main()
                     { vertex_buffer.get_buffer() },
                     { index_buffer },
                     { descriptor_set.sets[commands->current_frame] });
-                    
+
                 buffer->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
                 render_pass.end(buffer);
             });
