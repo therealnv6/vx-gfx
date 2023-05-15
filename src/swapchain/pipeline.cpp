@@ -178,7 +178,7 @@ namespace gfx
             false, // rasterizerDiscardEnable
             vk::PolygonMode::eFill, // polygonMode
             vk::CullModeFlagBits::eBack, // cullMode
-            vk::FrontFace::eClockwise, // frontFace
+            vk::FrontFace::eCounterClockwise, // frontFace
             false, // depthBiasEnable
             0.0f, // depthBiasConstantFactor
             0.0f, // depthBiasClamp

@@ -79,7 +79,9 @@ int main()
         };
 
         gfx::uniform_buffer_object object;
-        gfx::buffer<const gfx::vertex *> vertex_buffer(device, commands, vertices.data(), sizeof(gfx::vertex) * vertices.size(), vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
+        gfx::buffer<const gfx::vertex *> vertex_buffer(device, commands, vertices.data(), sizeof(gfx::vertex) * vertices.size(),
+            vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+            vma::memory_usage::GpuOnly);
 
         // doesn't work for some reason. have to investigate this
         // gfx::vec_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
@@ -152,11 +154,17 @@ int main()
 
             // run commands within the draw object
             drawer.run([&](vk::CommandBuffer *buffer, auto index) {
+                // this is just here temporarily, don't worry!
+                if (uniform_buffer.get_mapped_data(commands->current_frame) != nullptr)
+                {
+                    memcpy(uniform_buffer.get_mapped_data(commands->current_frame), &object, sizeof(object));
+                }
+
                 render_pass.begin(buffer, index, gfx::clear({ 0.0, 0.0, 0.0, 0.0 }));
                 pipeline.bind<const uint16_t *>(buffer,
                     { vertex_buffer.get_buffer() },
                     { index_buffer },
-                    { descriptor_set.sets[0] });
+                    { descriptor_set.sets[commands->current_frame] });
                 buffer->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
                 render_pass.end(buffer);
             });

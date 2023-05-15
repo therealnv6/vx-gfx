@@ -17,20 +17,25 @@ namespace gfx
     {
     public:
         size_t size;
+        std::vector<vk::Buffer> buffers;
 
         buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, const T &data, size_t size, vk::BufferUsageFlags usage, vma::memory_usage memory_usage);
         ~buffer();
 
-        vk::Buffer get_buffer() const
+        void *get_mapped_data(int frame = 0) const
         {
-            return this->vk_buffer;
+            return this->data_mapped[frame];
+        }
+
+        vk::Buffer get_buffer(int frame = 0) const
+        {
+            return this->buffers[frame];
         }
 
     private:
         std::shared_ptr<gfx::device> device;
-        vk::Buffer vk_buffer;
-
-        VmaAllocation allocation;
+        std::vector<VmaAllocation> allocations;
+        std::vector<void *> data_mapped;
     };
 
     template class gfx::buffer<const gfx::vertex *>;
@@ -61,17 +66,6 @@ namespace gfx
                 memory_usage
             } {};
         ~vec_buffer() {};
-
-        vk::Buffer get_buffer() const
-        {
-            return this->vk_buffer;
-        }
-
-    private:
-        std::shared_ptr<gfx::device> device;
-        vk::Buffer vk_buffer;
-
-        VmaAllocation allocation;
     };
 
     template class gfx::vec_buffer<gfx::vertex>;
