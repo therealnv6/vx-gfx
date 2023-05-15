@@ -122,7 +122,10 @@ int main()
         pipeline.initialize();
 
         uint32_t frame_time = 0.0;
-        double last_time = glfwGetTime();
+
+        auto start_time = std::chrono::high_resolution_clock::now();
+        auto last_time = std::chrono::high_resolution_clock::now();
+
 
         // create vertex buffer object
         // render loop
@@ -130,10 +133,12 @@ int main()
         {
 
             frame_time++;
-            auto current_time = glfwGetTime();
-            auto elapsed_time = current_time - last_time;
+            auto current_time = std::chrono::high_resolution_clock::now();
 
-            if (elapsed_time >= 1.0)
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
+            float time_since_last = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
+
+            if (time_since_last >= 1.0)
             {
                 glfwSetWindowTitle(context->window, std::to_string(frame_time).c_str());
                 frame_time = 0;
@@ -146,11 +151,10 @@ int main()
             // run commands within the draw object
             drawer.run([&](vk::CommandBuffer *buffer, auto index) {
                 // this is just here temporarily, don't worry!
-                static int a = 0;
                 if (uniform_buffer.get_mapped_data(commands->current_frame) != nullptr)
                 {
                     object = gfx::uniform_buffer_object {
-                        glm::rotate(glm::mat4(1.0f), static_cast<float>(last_time) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+                        glm::rotate(glm::mat4(1.0f), static_cast<float>(time) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
                         glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
                         glm::perspective(glm::radians(45.0f), swapchain->extent.width / (float) swapchain->extent.height, 0.1f, 10.0f)
                     };
