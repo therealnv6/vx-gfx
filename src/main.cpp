@@ -89,34 +89,29 @@ int main()
 
 		auto pool = std::make_shared<gfx::descriptor_pool>(device, vk::DescriptorType::eUniformBuffer);
 
-		// clang-format off
-        gfx::uniform_layout layout {
-            device,
-            {
-              0,
-              vk::DescriptorType::eUniformBuffer,
-              1,
-              vk::ShaderStageFlagBits::eVertex,
-              nullptr,
-              },
-            {
-              {},
-              0,
-            }
-        };
+		gfx::uniform_layout layout {
+			device,
+			{
+				0,
+				vk::DescriptorType::eUniformBuffer,
+				1,
+				vk::ShaderStageFlagBits::eVertex,
+				nullptr,
+			  },
+			{
+				{},
+				0,
+			  }
+		};
 
-		// clang-format on
 		gfx::descriptor_set<gfx::uniform_buffer_object> descriptor_set { pool, layout, uniform_buffer };
 
 		// bind vertex buffer and attribute descriptions
-		// clang-format off
-        pipeline.bind_vertex_buffer<gfx::vertex>(
-            gfx::vertex::get_binding_description(),
-            gfx::vertex::get_attribute_descriptions()
-        );
+		pipeline.bind_vertex_buffer<gfx::vertex>(
+			gfx::vertex::get_binding_description(),
+			gfx::vertex::get_attribute_descriptions());
 
-        pipeline.bind_uniform_layout(layout);
-		// clang-format on
+		pipeline.bind_uniform_layout(layout);
 
 		// initialize the pipeline object
 		pipeline.initialize();
