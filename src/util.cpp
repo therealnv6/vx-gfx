@@ -2,17 +2,17 @@
 
 namespace gfx
 {
-    vk::ClearValue clear(std::array<float, 4> f32)
-    {
-        return vk::ClearValue {
-            f32
-        };
-    }
+	vk::ClearValue clear(std::array<float, 4> f32)
+	{
+		return vk::ClearValue {
+			f32
+		};
+	}
 }
 
 namespace vma
 {
-    // clang-format off
+	// clang-format off
     VmaMemoryUsage to_vma_memory_usage(vma::memory_usage usage)
     {
         switch (usage)
@@ -30,5 +30,5 @@ namespace vma
             default: return VMA_MEMORY_USAGE_UNKNOWN;
         }
     }
-    // clang-format on
+	// clang-format on
 }

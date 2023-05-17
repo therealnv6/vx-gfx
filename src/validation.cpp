@@ -7,122 +7,122 @@
 
 namespace validation
 {
-    typedef vk::DebugUtilsMessageSeverityFlagBitsEXT severity_flags;
-    typedef vk::DebugUtilsMessageTypeFlagBitsEXT message_type_flag;
+	typedef vk::DebugUtilsMessageSeverityFlagBitsEXT severity_flags;
+	typedef vk::DebugUtilsMessageTypeFlagBitsEXT message_type_flag;
 
-    inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
-    {
-        auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
-        if (func != nullptr)
-        {
-            return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        }
-        else
-        {
-            return VK_ERROR_EXTENSION_NOT_PRESENT;
-        }
-    }
+	inline VkResult create_debug_utils_messenger(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
+	{
+		auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
+		if (func != nullptr)
+		{
+			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+		}
+		else
+		{
+			return VK_ERROR_EXTENSION_NOT_PRESENT;
+		}
+	}
 
-    inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
-    {
-        auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
-        if (func != nullptr)
-        {
-            func(instance, debugMessenger, pAllocator);
-        }
-    }
+	inline void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
+	{
+		auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
+		if (func != nullptr)
+		{
+			func(instance, debugMessenger, pAllocator);
+		}
+	}
 
-    static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-        void *pUserData)
-    {
-        auto severity = static_cast<severity_flags>(messageSeverity);
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+		void *pUserData)
+	{
+		auto severity = static_cast<severity_flags>(messageSeverity);
 
-        if (severity == severity_flags::eError)
-        {
-            spdlog::error(pCallbackData->pMessage);
-        }
-        else if (severity == severity_flags::eInfo)
-        {
-            spdlog::info(pCallbackData->pMessage);
-        }
-        else if (severity == severity_flags::eWarning)
-        {
-            spdlog::warn(pCallbackData->pMessage);
-        }
-        else if (severity == severity_flags::eVerbose)
-        {
-            spdlog::debug(pCallbackData->pMessage);
-        }
+		if (severity == severity_flags::eError)
+		{
+			spdlog::error(pCallbackData->pMessage);
+		}
+		else if (severity == severity_flags::eInfo)
+		{
+			spdlog::info(pCallbackData->pMessage);
+		}
+		else if (severity == severity_flags::eWarning)
+		{
+			spdlog::warn(pCallbackData->pMessage);
+		}
+		else if (severity == severity_flags::eVerbose)
+		{
+			spdlog::debug(pCallbackData->pMessage);
+		}
 
-        return VK_FALSE;
-    }
+		return VK_FALSE;
+	}
 
-    vk::DebugUtilsMessengerEXT create_debug_messenger(vk::Instance *instance)
-    {
-        if (!enable_validation_layers())
-        {
-            return nullptr;
-        }
+	vk::DebugUtilsMessengerEXT create_debug_messenger(vk::Instance *instance)
+	{
+		if (!enable_validation_layers())
+		{
+			return nullptr;
+		}
 
-        auto severity = severity_flags::eInfo
-            | severity_flags::eWarning
-            | severity_flags::eError
-            | severity_flags::eWarning;
+		auto severity = severity_flags::eInfo
+			| severity_flags::eWarning
+			| severity_flags::eError
+			| severity_flags::eWarning;
 
-        auto type = message_type_flag::eGeneral
-            | message_type_flag::eValidation
-            | message_type_flag::ePerformance;
+		auto type = message_type_flag::eGeneral
+			| message_type_flag::eValidation
+			| message_type_flag::ePerformance;
 
-        vk::DebugUtilsMessengerCreateInfoEXT createInfo({},
-            severity, // messageSeverity
-            type, // messageType
-            validation::debug_callback // pfnUserCallback
-        );
+		vk::DebugUtilsMessengerCreateInfoEXT createInfo({},
+			severity, // messageSeverity
+			type, // messageType
+			validation::debug_callback // pfnUserCallback
+		);
 
-        auto legacy_create_info = static_cast<VkDebugUtilsMessengerCreateInfoEXT>(createInfo);
-        VkDebugUtilsMessengerEXT debug_target;
+		auto legacy_create_info = static_cast<VkDebugUtilsMessengerCreateInfoEXT>(createInfo);
+		VkDebugUtilsMessengerEXT debug_target;
 
-        VkResult result = create_debug_utils_messenger(*instance, &legacy_create_info, nullptr, &debug_target);
+		VkResult result = create_debug_utils_messenger(*instance, &legacy_create_info, nullptr, &debug_target);
 
-        if (result != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to set up debug messenger: " + std::to_string(result));
-        }
+		if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to set up debug messenger: " + std::to_string(result));
+		}
 
-        return debug_target;
-    }
+		return debug_target;
+	}
 
-    const bool enable_validation_layers()
-    {
-        return !ENABLED_LAYERS.empty();
-    }
+	const bool enable_validation_layers()
+	{
+		return !ENABLED_LAYERS.empty();
+	}
 
-    const bool check_validation_layer_support()
-    {
-        std::vector<vk::LayerProperties> available_layers = vk::enumerateInstanceLayerProperties();
+	const bool check_validation_layer_support()
+	{
+		std::vector<vk::LayerProperties> available_layers = vk::enumerateInstanceLayerProperties();
 
-        for (const char *layer_name : ENABLED_LAYERS)
-        {
-            bool layer_found = false;
+		for (const char *layer_name : ENABLED_LAYERS)
+		{
+			bool layer_found = false;
 
-            for (const auto &layer_properties : available_layers)
-            {
-                if (strcmp(layer_name, layer_properties.layerName) == 0)
-                {
-                    layer_found = true;
-                    break;
-                }
-            }
+			for (const auto &layer_properties : available_layers)
+			{
+				if (strcmp(layer_name, layer_properties.layerName) == 0)
+				{
+					layer_found = true;
+					break;
+				}
+			}
 
-            if (!layer_found)
-            {
-                return false;
-            }
-        }
+			if (!layer_found)
+			{
+				return false;
+			}
+		}
 
-        return true;
-    }
+		return true;
+	}
 }

@@ -9,56 +9,56 @@
 
 namespace gfx
 {
-    class descriptor_pool
-    {
-    public:
-        descriptor_pool(std::shared_ptr<gfx::device> device, vk::DescriptorType type)
-            : type { type }
-            , device { device }
-        {
-            this->create_pool();
-        };
+	class descriptor_pool
+	{
+	public:
+		descriptor_pool(std::shared_ptr<gfx::device> device, vk::DescriptorType type)
+			: type { type }
+			, device { device }
+		{
+			this->create_pool();
+		};
 
-        ~descriptor_pool()
-        {
-            device->get_logical_device().destroyDescriptorPool(this->pool);
-        }
+		~descriptor_pool()
+		{
+			device->get_logical_device().destroyDescriptorPool(this->pool);
+		}
 
-        std::vector<vk::DescriptorSet> create_descriptor_sets(gfx::uniform_layout layout)
-        {
-            spdlog::info("create descriptor sets");
-            std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, layout.layout);
-            std::vector<vk::DescriptorSet> sets(MAX_FRAMES_IN_FLIGHT);
+		std::vector<vk::DescriptorSet> create_descriptor_sets(gfx::uniform_layout layout)
+		{
+			spdlog::info("create descriptor sets");
+			std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, layout.layout);
+			std::vector<vk::DescriptorSet> sets(MAX_FRAMES_IN_FLIGHT);
 
-            vk::DescriptorSetAllocateInfo allocate {
-                this->pool,
-                static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT),
-                layouts.data()
-            };
+			vk::DescriptorSetAllocateInfo allocate {
+				this->pool,
+				static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT),
+				layouts.data()
+			};
 
-            auto result = device->get_logical_device().allocateDescriptorSets(&allocate, sets.data());
+			auto result = device->get_logical_device().allocateDescriptorSets(&allocate, sets.data());
 
-            if (result != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("error while allocating descriptor sets!");
-            }
+			if (result != vk::Result::eSuccess)
+			{
+				throw std::runtime_error("error while allocating descriptor sets!");
+			}
 
-            spdlog::info("created {}...", sets.size());
-            return sets;
-        }
-        
-        std::shared_ptr<gfx::device> device;
+			spdlog::info("created {}...", sets.size());
+			return sets;
+		}
 
-    private:
-        vk::DescriptorType type;
-        vk::DescriptorPool pool;
+		std::shared_ptr<gfx::device> device;
 
-        void create_pool()
-        {
-            vk::DescriptorPoolSize size { type, MAX_FRAMES_IN_FLIGHT };
-            vk::DescriptorPoolCreateInfo info { {}, MAX_FRAMES_IN_FLIGHT, 1, &size };
+	private:
+		vk::DescriptorType type;
+		vk::DescriptorPool pool;
 
-            this->pool = device->get_logical_device().createDescriptorPool(info);
-        }
-    };
+		void create_pool()
+		{
+			vk::DescriptorPoolSize size { type, MAX_FRAMES_IN_FLIGHT };
+			vk::DescriptorPoolCreateInfo info { {}, MAX_FRAMES_IN_FLIGHT, 1, &size };
+
+			this->pool = device->get_logical_device().createDescriptorPool(info);
+		}
+	};
 }

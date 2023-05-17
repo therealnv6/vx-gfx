@@ -6,21 +6,21 @@
 
 namespace gfx
 {
-    class uniform_layout
-    {
-    public:
-        vk::DescriptorSetLayout layout;
+	class uniform_layout
+	{
+	public:
+		vk::DescriptorSetLayout layout;
 
-        uniform_layout(std::shared_ptr<gfx::device> device, vk::DescriptorSetLayoutBinding binding, vk::DescriptorSetLayoutCreateInfo create_info)
-        {
-            create_info.setBindings(binding);
-            
-            auto result = device->get_logical_device().createDescriptorSetLayout(&create_info, nullptr, &layout);
+		uniform_layout(std::shared_ptr<gfx::device> device, vk::DescriptorSetLayoutBinding binding, vk::DescriptorSetLayoutCreateInfo create_info)
+		{
+			create_info.setBindings(binding);
 
-            if (result != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("unable to create descriptor layout with binding!");
-            }
-        }
-    };
+			auto result = device->get_logical_device().createDescriptorSetLayout(&create_info, nullptr, &layout);
+
+			if (result != vk::Result::eSuccess)
+			{
+				throw std::runtime_error("unable to create descriptor layout with binding!");
+			}
+		}
+	};
 }
