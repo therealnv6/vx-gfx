@@ -38,6 +38,8 @@ const std::vector<uint16_t> indices = {
 // supposed to be used as a part of the library.
 int main()
 {
+	spdlog::set_pattern("[%^%l%$] %v");
+
 	try
 	{
 		// create shared context object
@@ -77,13 +79,13 @@ int main()
 			"build/triangle.frag.spv",
 		};
 
-		gfx::uniform_buffer_object object;
-		gfx::buffer<const gfx::vertex *> vertex_buffer(device, commands, vertices.data(), sizeof(gfx::vertex) * vertices.size(),
-			vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-			vma::memory_usage::GpuOnly);
-
+		vk::BufferUsageFlags flags = vk::BufferUsageFlagBits::eVertexBuffer
+			| vk::BufferUsageFlagBits::eTransferDst;
+		gfx::buffer<const gfx::vertex *> vertex_buffer(device, commands, vertices.data(), sizeof(gfx::vertex) * vertices.size(), flags, vma::memory_usage::GpuOnly);
 		// doesn't work for some reason. have to investigate this
 		// gfx::vec_buffer<gfx::vertex> vertex_buffer(device, commands, vertices, vk::BufferUsageFlagBits::eVertexBuffer, vma::memory_usage::GpuOnly);
+
+		gfx::uniform_buffer_object object;
 		gfx::index_buffer<const uint16_t *> index_buffer(device, commands, indices.data(), sizeof(uint16_t) * indices.size(), vma::memory_usage::GpuOnly, vk::IndexType::eUint16);
 		gfx::uniform_buffer<gfx::uniform_buffer_object> uniform_buffer(device, commands, object, sizeof(gfx::uniform_buffer_object), vma::memory_usage::GpuOnly);
 

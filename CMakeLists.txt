@@ -33,6 +33,11 @@ file(GLOB_RECURSE SOURCES
     ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
+set(SOURCES 
+  ${SOURCES} 
+  thirdparty/stb_image.h
+)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
@@ -40,7 +45,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     include
     ${CMAKE_CURRENT_BINARY_DIR}
     "thirdparty/glfw/include/"
-    "thirdparty/vma/include"
+    "thirdparty/vma/include/"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 

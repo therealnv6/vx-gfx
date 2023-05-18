@@ -36,9 +36,6 @@ namespace gfx
 		device(const vk::Instance *instance, const vk::SurfaceKHR *surface);
 		~device();
 
-		device(const device &) = delete;
-		device operator=(const device &) = delete;
-
 		gfx::queue_family_indices find_queue_families(const vk::SurfaceKHR *surface, std::optional<vk::PhysicalDevice> device);
 
 		VmaAllocator get_vma_allocator()

@@ -34,9 +34,15 @@ namespace gfx
 		vk::ResultValue<uint32_t> image_index = device->get_logical_device().acquireNextImageKHR(
 			swapchain->chain,
 			UINT64_MAX,
-			commands->image_available_semaphores[commands->current_frame]);
+			commands->image_available_semaphores[commands->current_frame] // we want the current frame's semaphore, because we need the image index.
+		);
 
+		// we can call the draw() callback here, this will call of the user-implemented graphics calls.
 		draw(&commands->command_buffers[commands->current_frame], image_index.value);
+
+		// we have to end the command buffer before we can do anything else, we can do this here,
+		// as long as we do it before we submit the info the graphics card.
+		// it makes sense to do it here, as the lines under here are just declaratioss.
 		commands->command_buffers[commands->current_frame].end();
 
 		spdlog::debug("just passed draw()");
