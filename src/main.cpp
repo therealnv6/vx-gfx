@@ -23,16 +23,21 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 const std::vector<gfx::vertex> vertices = {
-	{{ -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
-	{ { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }},
-	{  { 0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }},
-	{ { -0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f }}
+	{ { -0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f }},
+	{  { 0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f }},
+	{	  { 0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f }},
+	{  { -0.5f, 0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }},
+
+	{{ -0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
+	{ { 0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }},
+	{  { 0.5f, 0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f }},
+	{ { -0.5f, 0.5f, -0.5f }, { 1.0f, 1.0f, 1.0f }}
 };
 
 const std::vector<uint16_t> indices = {
-	0, 1, 2, 2, 3, 0
+	0, 1, 2, 2, 3, 0,
+	4, 5, 6, 6, 7, 4
 };
-
 // initialize graphics context, device and swapchain
 // this is just a simple testing environment/playground for me, this is not
 // supposed to be used as a part of the library.

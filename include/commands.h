@@ -59,6 +59,7 @@ namespace gfx
 
 		void submit_and_wait(const vk::CommandBuffer &command_buffer);
 		void begin(const vk::CommandBuffer &command_buffer);
+		void submit_nowait(std::function<void(vk::CommandBuffer &buffer)>);
 
 		vk::CommandBuffer start_small_buffer();
 

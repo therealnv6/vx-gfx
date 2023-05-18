@@ -97,4 +97,20 @@ namespace gfx
 			throw std::runtime_error("Failed to wait for fence");
 		}
 	}
+
+	void commands::submit_nowait(std::function<void(vk::CommandBuffer &buffer)> callback)
+	{
+		auto command_buffer = start_small_buffer();
+		command_buffer.reset(); // reset command buffer
+		command_buffer.begin(vk::CommandBufferBeginInfo {});
+
+		callback(command_buffer);
+
+		command_buffer.end();
+
+		vk::Fence *fence = &in_flight_fences[current_frame];
+		vk::SubmitInfo submit_info(0, nullptr, nullptr, 1, &command_buffer, 0, nullptr);
+
+		device->graphics_queue.submit(submit_info, *fence);
+	}
 }

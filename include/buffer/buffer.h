@@ -44,7 +44,13 @@ namespace gfx
 		}
 
 	private:
+		void create_staging_buffer(const T &data, size_t size);
+		void create_device_buffer(vk::BufferUsageFlags usage, vma::memory_usage memory_usage);
+		void copy_data(vk::CommandBuffer commandBuffer);
+		void destroy();
+
 		std::shared_ptr<gfx::device> device;
+		std::shared_ptr<gfx::commands> commands;
 		std::vector<VmaAllocation> allocations;
 		std::vector<void *> data_mapped;
 	};
