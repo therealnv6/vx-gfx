@@ -89,10 +89,12 @@ namespace gfx
 	class buffer<VkImage>
 	{
 	public:
-		buffer(std::shared_ptr<gfx::device> device, std::shared_ptr<gfx::commands> commands, VkImage image, vk::ImageUsageFlags usage, vma::memory_usage memory_usage)
+		buffer(std::shared_ptr<gfx::device> device,
+			std::shared_ptr<gfx::commands> commands,
+			vk::ImageUsageFlags usage,
+			vma::memory_usage memory_usage)
 			: device(device)
 			, commands(commands)
-			, image(image)
 		{
 			create_device_image(usage, memory_usage);
 		}
@@ -135,6 +137,7 @@ namespace gfx
 				&allocation,
 				nullptr);
 		}
+
 		void destroy_image()
 		{
 			vmaDestroyImage(device->get_vma_allocator(), image, allocation);
