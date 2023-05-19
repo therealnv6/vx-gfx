@@ -96,9 +96,15 @@ namespace gfx
 		{
 			create_device_image(usage, memory_usage);
 		}
+
 		~buffer()
 		{
 			destroy_image();
+		}
+
+		vk::Image get_image()
+		{
+			return static_cast<vk::Image>(this->image);
 		}
 
 	private:
